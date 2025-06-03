@@ -1,0 +1,12 @@
+@import "tailwindcss";
+.bg-fafafa {
+    background-color: #fafafa;
+  }
+
+  .bg-#f9fafb{
+    background-color: #f9fafb;
+  }
+
+  .text-customGray {
+    color: #4B5563;
+  }
