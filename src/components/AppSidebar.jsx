@@ -8,6 +8,9 @@ import {
   UserCheck,
   CheckSquare,
   FileText,
+  Store,
+  Package,
+  Warehouse
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -15,11 +18,12 @@ const menuItems = [
   { title: "Dashboard", url: "/dashboard", icon: <Home size={20} /> },
   { title: "Sales", url: "/sales", icon: <ShoppingCart size={20} /> },
   { title: "Purchases", url: "/purchases", icon: <ShoppingBag size={20} /> },
-  { title: "Projects", url: "/projects", icon: <FolderOpen size={20} /> },
+  { title: "Product", url: "/products", icon: <Package size={20} /> },
+  { title: "Inventory", url: "/inventory", icon: <Warehouse size={20} /> },
+  { title: "Vendors", url: "/vendors", icon: <Store size={20} /> },
   { title: "Staff", url: "/staff", icon: <Users size={20} /> },
   { title: "Resellers", url: "/resellers", icon: <UserCheck size={20} /> },
   { title: "Tasks", url: "/tasks", icon: <CheckSquare size={20} /> },
-  { title: "Invoicing", url: "/invoices", icon: <FileText size={20} /> },
 ];
 
 const Sidebar = () => {
@@ -54,7 +58,7 @@ const Sidebar = () => {
         ))}
       </nav>
       <div className="mt-auto text-sm text-gray-500 p-4 border-t border-gray-200">
-        V 1.3.4 <br></br>© Copyright 2023<br></br> Mhlantuma (Pty) Ltd
+        V 1.3.4 <br></br>© Copyright 2023<br></br> Nhlakanipho (Pty) Ltd
       </div>
     </div>
   );

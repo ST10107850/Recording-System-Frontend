@@ -1,23 +1,12 @@
 import React, { useState } from "react";
 import Topbar from "../components/TopBar";
 import { Card } from "../components/ui/Card";
-import {
-  MapPin,
-  Phone,
-  Mail,
-  TrendingUp,
-  Package,
-  Eye,
-  Edit,
-  Trash2,
-} from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
 import { Badge } from "../components/ui/Badge";
-import AddResellerForm from "../components/AddResellerForm";
-import ViewResellerModal from "../components/ViewResellerModal";
-import EditResellerForm from "../components/EditResellerForm ";
+import { useNavigate } from "react-router";
 
-const Resellers = () => {
-  const [resellers, setResellers] = useState([
+const Vendors = () => {
+  const [resellers] = useState([
     {
       id: 1,
       name: "Sweet Treats Café",
@@ -72,11 +61,6 @@ const Resellers = () => {
     },
   ]);
 
-  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
-  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedReseller, setSelectedReseller] = useState(null);
-
   const getStatusColor = (status) => {
     switch (status) {
       case "active":
@@ -90,45 +74,18 @@ const Resellers = () => {
     }
   };
 
-  const handleAddReseller = (newReseller) => {
-    setResellers((prev) => [...prev, newReseller]);
+  const navigate = useNavigate();
+  const handleAddVendor = () => {
+    navigate("/vendors/create");
   };
-
-  const handleUpdateReseller = (updatedReseller) => {
-    setResellers((prev) =>
-      prev.map((reseller) =>
-        reseller.id === updatedReseller.id ? updatedReseller : reseller
-      )
-    );
-    setSelectedReseller(null);
-  };
-
-  const handleDeleteReseller = (id) => {
-    if (confirm("Are you sure you want to delete this reseller?")) {
-      setResellers(resellers.filter((reseller) => reseller.id !== id));
-    }
-  };
-
-  const handleViewReseller = (id) => {
-    const reseller = resellers.find((reseller) => reseller.id === id);
-    setSelectedReseller(reseller);
-    setIsViewModalOpen(true);
-  };
-
-  const handleEditReseller = (id) => {
-    const reseller = resellers.find((reseller) => reseller.id === id);
-    setSelectedReseller(reseller);
-    setIsEditFormOpen(true);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Topbar
-        title="Reseller Management"
+        title="Vendor Management"
         showSearch={true}
         showAddButton={true}
-        addButtonText="Add Reseller"
-        onAddClick={() => setIsAddFormOpen(true)}
+        addButtonText="Add Vendor"
+        onAddClick={handleAddVendor}
       />
 
       <div className="p-6">
@@ -171,61 +128,24 @@ const Resellers = () => {
                     <div className="text-lg font-semibold text-gray-900">
                       R {reseller.totalSales.toLocaleString()}
                     </div>
-                    <div className="text-xs text-gray-500">Total Sales</div>
+                    <div className="text-xs text-gray-500">Total Purchased</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-semibold text-green-600">
+                    {/* <div className="text-lg font-semibold text-green-600">
                       {reseller.thisMonth.toLocaleString()}
                     </div>
                     <div className="text-xs text-gray-500">
-                      Total Number of Sales
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-blue-600" />
-                    <span className="text-gray-600">
-                      Commission: {reseller.commission}%
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <Package className="w-4 h-4 text-purple-600 mt-0.5" />
-                    <div>
-                      <div className="text-gray-600 mb-1">Products:</div>
-                      <div className="flex flex-wrap gap-1">
-                        {reseller.products.map((product, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {product}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+                      Total Number of Items
+                    </div> */}
                   </div>
                 </div>
 
                 <div className="flex pt-3  border-t justify-between border-gray-100">
-                  <button
-                    onClick={() => handleViewReseller(reseller.id)}
-                    className="border border-gray-200 text-sm px-3 py-1 flex items-center gap-2 rounded hover:bg-gray-50 transition"
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    View
+                  <button className="border border-gray-200 text-sm px-3 py-1 rounded hover:bg-gray-50 transition">
+                    View Details
                   </button>
-                  <button
-                    onClick={() => handleEditReseller(reseller.id)}
-                    className="border border-gray-200 text-sm px-6 py-2 flex items-center gap-2 rounded hover:bg-gray-50 transition"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
+                  <button className="border border-gray-200 text-sm px-6 py-2 rounded hover:bg-gray-50 transition">
                     Edit
-                  </button>
-                  <button className="border border-gray-200 text-sm text-red-500 px-6 py-2 flex items-center gap-2 rounded hover:bg-gray-50 transition">
-                    <Trash2 className="w-4 h-4 mr-1" />
                   </button>
                 </div>
               </div>
@@ -233,32 +153,8 @@ const Resellers = () => {
           ))}
         </div>
       </div>
-      <AddResellerForm
-        isOpen={isAddFormOpen}
-        onClose={() => setIsAddFormOpen(false)}
-        onAddReseller={handleAddReseller}
-      />
-
-      <EditResellerForm
-        isOpen={isEditFormOpen}
-        onClose={() => {
-          setIsEditFormOpen(false);
-          setSelectedReseller(null);
-        }}
-        onUpdateReseller={handleUpdateReseller}
-        reseller={selectedReseller}
-      />
-
-      <ViewResellerModal
-        isOpen={isViewModalOpen}
-        onClose={() => {
-          setIsViewModalOpen(false);
-          setSelectedReseller(null);
-        }}
-        reseller={selectedReseller}
-      />
     </div>
   );
 };
 
-export default Resellers;
+export default Vendors;

@@ -42,7 +42,7 @@ const Topbar = ({
         {showAddButton && (
           <button
             onClick={onAddClick}
-            className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+            className="bg-gray-800 hover:bg-gray-900 hover:cursor-pointer text-white px-4 py-2 rounded-lg flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             {addButtonText}
