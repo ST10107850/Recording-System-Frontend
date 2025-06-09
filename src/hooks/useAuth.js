@@ -54,7 +54,24 @@ export const useAuth = () => {
       navigate("/vendors");
     } catch (err) {
       console.error("Login Error:", err);
-      alert(err.data.message || err.error || "Something went wrong.");
+
+      let errorMessage = "Something went wrong.";
+
+      if (err?.data?.error?.length > 0) {
+        errorMessage = err.data.error.map((e) => e.message).join(", ");
+      } else if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.error) {
+        errorMessage = err.error;
+      }
+
+      setError(errorMessage);
+
+      toast({
+        title: "Login Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
     }
   };
 

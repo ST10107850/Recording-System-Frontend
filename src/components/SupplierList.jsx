@@ -1,48 +1,20 @@
 import React, { useState } from "react";
 import { Card } from "./ui/Card";
 import { MapPin, Phone, Search } from "lucide-react";
+import { useSupplier } from "../hooks/use-supplier";
 
 export const SupplierList = ({ onSelect, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const suppliers = [
-    {
-      id: "1",
-      name: "Shoprite Flagstaff",
-      address: "Flagstaff Shopping Centre, Flagstaff",
-      phone: "047 491 0123",
-      type: "Supermarket",
-    },
-    {
-      id: "2",
-      name: "Pick n Pay Mthatha",
-      address: "Mthatha Plaza, Mthatha",
-      phone: "047 532 1234",
-      type: "Supermarket",
-    },
-    {
-      id: "3",
-      name: "Spar Flagstaff",
-      address: "Main Road, Flagstaff",
-      phone: "047 491 5678",
-      type: "Supermarket",
-    },
-    {
-      id: "4",
-      name: "Fresh Produce Suppliers",
-      address: "Industrial Area, Mthatha",
-      phone: "047 532 9876",
-      type: "Wholesale",
-    },
-    {
-      id: "5",
-      name: "Bakery Ingredients Co.",
-      address: "Commercial Street, Mthatha",
-      phone: "047 532 4567",
-      type: "Specialist",
-    },
-  ];
+  const { data = {}, isLoading, isError, error } = useSupplier();
 
+  const suppliers = data.data || [];
+
+  if (isLoading) return <p>Loading supplier...</p>;
+  if (isError)
+    return <p>Error: {error?.data?.message || "Failed to load supplier"}</p>;
+
+  
   const filteredSuppliers = suppliers.filter(
     (supplier) =>
       supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -73,7 +45,7 @@ export const SupplierList = ({ onSelect, onClose }) => {
           <div className="space-y-3">
             {filteredSuppliers.map((supplier) => (
               <Card
-                key={supplier.id}
+                key={supplier._id}
                 className="p-4 hover:bg-gray-50 cursor-pointer transition-colors border-gray-200"
                 onClick={() => onSelect(supplier)}
               >
@@ -82,19 +54,25 @@ export const SupplierList = ({ onSelect, onClose }) => {
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-medium">{supplier.name}</h3>
                       <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        {supplier.type}
+                        {supplier.type || "Unknown"}
                       </span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600 mb-1">
                       <MapPin className="h-3 w-3 mr-1" />
-                      {supplier.address}
+                      {supplier?.address
+                        ? `${supplier.address.street}, ${supplier.address.city}, ${supplier.address.zip}`
+                        : "No address"}
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <Phone className="h-3 w-3 mr-1" />
-                      {supplier.phone}
+                      {supplier.phoneNumber}
                     </div>
                   </div>
-                  <button variant="outline" size="sm" className="ml-4 px-4 py-2 text-sm  border border-gray-200 hover:bg-blue-50">
+                  <button
+                    variant="outline"
+                    size="sm"
+                    className="ml-4 px-4 py-2 text-sm  border border-gray-200 hover:bg-blue-50"
+                  >
                     Select
                   </button>
                 </div>

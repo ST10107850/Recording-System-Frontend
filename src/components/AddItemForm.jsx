@@ -2,24 +2,26 @@ import React, { useState } from "react";
 
 export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    itemName: "",
     category: "",
     quantity: 0,
     minStockLevel: 0,
+    unitCost: 0,
     unit: "",
   });
 
-  const categories = ["Consumable", "PPE", "Ingredients"];
+  const categories = ["consumable", "ppe", "ingredients"];
   const units = ["kg", "liters", "pieces", "grams", "ml", "boxes", "packs"];
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.name && formData.category && formData.unit) {
+    if (formData.itemName && formData.category && formData.unit) {
       onAddItem(formData);
       setFormData({
-        name: "",
+        itemName: "",
         category: "",
         quantity: 0,
+        unitCost: 0,
         minStockLevel: 0,
         unit: "",
       });
@@ -39,7 +41,7 @@ export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white rounded-lg shadow-lg max-w-xl w-full max-h-[90vh] overflow-y-auto p-6">
-        <h2 className="text-lg font-semibold mb-4">Add New Item</h2>
+        <h2 className="text-lg font-semibold mb-4">Add New Inventory Item</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Item Name */}
           <div className="space-y-2">
@@ -50,9 +52,9 @@ export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
               Item Name
             </label>
             <input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
+              id="itemName"
+              value={formData.itemName}
+              onChange={(e) => handleInputChange("itemName", e.target.value)}
               placeholder="Enter item name"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -117,6 +119,26 @@ export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
               value={formData.minStockLevel || ""}
               onChange={(e) =>
                 handleInputChange("minStockLevel", Number(e.target.value))
+              }
+              placeholder="0"
+              min="0"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="unitCost"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Unit Cost
+            </label>
+            <input
+              id="unitCost"
+              type="number"
+              value={formData.unitCost || ""}
+              onChange={(e) =>
+                handleInputChange("unitCost", Number(e.target.value))
               }
               placeholder="0"
               min="0"

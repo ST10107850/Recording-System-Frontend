@@ -4,24 +4,18 @@ import {  AlertTriangle, ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import Topbar from "../components/TopBar";
+import { useGetInventoryByIdQuery } from "../features/user/inventory-slice";
 
 const InventoryView = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  const {data}= useGetInventoryByIdQuery(id);
+  const mockInventoryItem = data?.data || {};
+  
+
   const [toastVisible, setToastVisible] = useState(false);
 
-  const mockInventoryItem = {
-    id: id || "1",
-    itemName: "Flour - All Purpose",
-    category: "ingredients",
-    quantity: 15,
-    minStockLevel: 20,
-    unitCost: 12.5,
-    createdBy: { id: "1", name: "Admin User" },
-    createdAt: "2024-01-10T08:00:00Z",
-    updatedAt: "2024-01-15T14:30:00Z",
-  };
 
   const isLowStock =
     mockInventoryItem.quantity <= mockInventoryItem.minStockLevel;
@@ -162,7 +156,7 @@ const InventoryView = () => {
                       Unit Cost
                     </p>
                     <p className="text-lg font-semibold">
-                      R{mockInventoryItem.unitCost.toFixed(2)}
+                      R{mockInventoryItem.unitCost?.toFixed(2)}
                     </p>
                   </div>
                   <div>
@@ -173,7 +167,7 @@ const InventoryView = () => {
                       R
                       {(
                         mockInventoryItem.quantity * mockInventoryItem.unitCost
-                      ).toFixed(2)}
+                      )?.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -237,7 +231,7 @@ const InventoryView = () => {
                   <p className="text-sm font-medium text-gray-500">
                     Created By
                   </p>
-                  <p className="text-sm">{mockInventoryItem.createdBy.name}</p>
+                  <p className="text-sm">{mockInventoryItem.createdBy?.name}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">

@@ -4,44 +4,16 @@ import Topbar from "../components/TopBar";
 import { AlertTriangle, Edit, Eye, Trash2 } from "lucide-react";
 import { Badge } from "../components/ui/Badge";
 import { Card } from "../components/ui/Card";
-import AddInventoryForm from "../components/AddInventoryForm ";
-// import AddInventoryForm from "@/components/AddInventoryForm";
+import { AddItemForm } from "../components/AddItemForm";
+import { useInventory } from "../hooks/inventory/use-inventory";
+import { useCreateInventoryMutation } from "../features/user/inventory-slice";
+import { useToast } from "../hooks/use-toast";
 
 const Inventory = () => {
-  //   const navigate = useNavigate();
-
-  const [inventory, setInventory] = useState([
-    {
-      id: "1",
-      itemName: "Flour",
-      category: "ingredients",
-      quantity: 50,
-      minStockLevel: 10,
-      unitCost: 25.5,
-      createdBy: { id: "1", name: "John Doe" },
-      createdAt: "2024-01-15",
-    },
-    {
-      id: "2",
-      itemName: "Sugar",
-      category: "ingredients",
-      quantity: 5,
-      minStockLevel: 15,
-      unitCost: 18.99,
-      createdBy: { id: "1", name: "John Doe" },
-      createdAt: "2024-01-14",
-    },
-    {
-      id: "3",
-      itemName: "Safety Gloves",
-      category: "ppe",
-      quantity: 20,
-      minStockLevel: 5,
-      unitCost: 12.5,
-      createdBy: { id: "1", name: "John Doe" },
-      createdAt: "2024-01-13",
-    },
-  ]);
+  const { data = {} } = useInventory();
+  const [createInventory] = useCreateInventoryMutation();
+  const inventory = data.data || [];
+  const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
@@ -52,21 +24,33 @@ const Inventory = () => {
       item.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddInventoryItem = (newItem) => {
-    const item = {
-      id: Date.now().toString(),
-      ...newItem,
-      createdBy: { id: "1", name: newItem.createdBy },
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    setInventory((prev) => [...prev, item]);
-  };
-
   const handleDeleteInventoryItem = (id) => {
     if (
       window.confirm("Are you sure you want to delete this inventory item?")
     ) {
-      setInventory(inventory.filter((item) => item.id !== id));
+      // Implement delete logic here (e.g., API call)
+    }
+  };
+
+  const handleAddItem = async (newItem) => {
+    try {
+      await createInventory(newItem).unwrap();
+      toast({
+        title: "Inventory successfully!",
+        description:
+          "Inventory item added successfully to Dough Better Records System",
+      });
+      setIsAddFormOpen(false);
+    } catch (err) {
+
+      const errorDetails = err?.data?.error;
+      if (Array.isArray(errorDetails)) {
+        errorDetails.forEach((e) => {
+          alert(e?.msg || "Validation error");
+        });
+      } else {
+        alert(err?.data?.message || "Failed to add inventory item.");
+      }
     }
   };
 
@@ -98,7 +82,7 @@ const Inventory = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         {filteredInventory.map((item) => (
           <Card
-            key={item.id}
+            key={item._id}
             className="p-6 hover:shadow-lg transition-shadow bg-white border-gray-200"
           >
             <div className="flex justify-between items-start mb-4">
@@ -127,13 +111,13 @@ const Inventory = () => {
                       : "text-gray-900"
                   }`}
                 >
-                  {item.quantity} units
+                  {item.quantity} {item.unit}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Min Level:</span>
                 <span className="text-gray-900">
-                  {item.minStockLevel} units
+                  {item.minStockLevel} {item.unit}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -146,23 +130,23 @@ const Inventory = () => {
 
             <div className="flex justify-between items-center pt-3 border-t border-gray-100">
               <span className="text-xs text-gray-500">
-                Added: {item.createdAt}
+                Added: {new Date(item.createdAt).toLocaleDateString("en-GB")}
               </span>
               <div className="flex space-x-6">
                 <Link
-                  to={`/inventory/${item.id}`}
+                  to={`/inventory/${item._id}`}
                   className="text-gray-600 hover:bg-gray-100 p-2"
                 >
                   <Eye className="h-5 w-5" />
                 </Link>
                 <Link
-                  to={`/inventory/${item.id}/edit`}
-                  className="text-gray-600 hover:bg-gray-100 p-2 "
+                  to={`/inventory/${item._id}/edit`}
+                  className="text-gray-600 hover:bg-gray-100 p-2"
                 >
                   <Edit className="h-5 w-5" />
                 </Link>
                 <button
-                  onClick={() => handleDeleteInventoryItem(item.id)}
+                  onClick={() => handleDeleteInventoryItem(item._id)}
                   className="text-red-600 hover:bg-gray-100 p-2"
                 >
                   <Trash2 className="h-5 w-5" />
@@ -172,10 +156,11 @@ const Inventory = () => {
           </Card>
         ))}
       </div>
-      <AddInventoryForm
+
+      <AddItemForm
         isOpen={isAddFormOpen}
         onClose={() => setIsAddFormOpen(false)}
-        onAddItem={handleAddInventoryItem}
+        onAddItem={handleAddItem}
       />
     </div>
   );

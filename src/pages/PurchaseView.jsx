@@ -4,43 +4,19 @@ import TopBar from "../components/TopBar";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { ArrowLeft, Download, Printer } from "lucide-react";
+import { useGetPurchaseByIdQuery } from "../features/user/purchase-slice";
 
 export const PurchaseView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+ 
+  const { data } = useGetPurchaseByIdQuery(id);
 
-  // Mock data - in real app this would come from API
-  const purchase = {
-    id: id || "P2023120076",
-    date: "12/10/2023",
-    supplier: "Shoprite Flagstaff",
-    status: "Completed",
-    receiptImage:
-      "https://img.freepik.com/free-vector/realistic-receipt-template_23-2147938550.jpg?semt=ais_hybrid&w=740",
-    items: [
-      { name: "Eggs", quantity: 60, type: "Ingredient", amount: 140 },
-      { name: "Eggs", quantity: 60, type: "Ingredient", amount: 140 },
-      { name: "Eggs", quantity: 60, type: "Ingredient", amount: 140 },
-    ],
-    subtotal: 400,
-    vat: 0,
-    total: 400,
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Completed":
-        return "bg-green-100 text-green-800";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const purchase = data?.data || {};
   return (
     <div className="min-h-screen bg-gray-50">
       <TopBar
-        title={`Purchase No. ${purchase.id}`}
+        title={`Purchase No. ${purchase.purchaseNo}`}
         showSearch={false}
         showAddButton={false}
       />
@@ -64,9 +40,12 @@ export const PurchaseView = () => {
                 <div className="flex justify-between items-start mb-8">
                   <div>
                     <h1 className="text-2xl font-bold mb-2">
-                      Purchase No. {purchase.id}
+                      Purchase No. {purchase.purchaseNo}
                     </h1>
-                    <div className="text-gray-600">Date: {purchase.date}</div>
+                    <div className="text-gray-600">
+                      Date:{" "}
+                      {new Date(purchase.createdAt).toLocaleDateString("en-GB")}
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -96,12 +75,9 @@ export const PurchaseView = () => {
                         Supplier
                       </div>
                       <div className="text-lg font-medium">
-                        {purchase.supplier}
+                        {purchase.vendor?.name || "Unknown Supplier"}
                       </div>
                     </div>
-                    <Badge className={getStatusColor(purchase.status)}>
-                      {purchase.status}
-                    </Badge>
                   </div>
                 </div>
 
@@ -127,12 +103,12 @@ export const PurchaseView = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
-                        {purchase.items.map((item, index) => (
+                        {purchase.items?.map((item, index) => (
                           <tr key={index} className="hover:bg-gray-50">
                             <td className="px-4 py-3">{item.name}</td>
                             <td className="px-4 py-3">{item.quantity}</td>
-                            <td className="px-4 py-3">{item.type}</td>
-                            <td className="px-4 py-3">R{item.amount}</td>
+                            <td className="px-4 py-3">{item.category}</td>
+                            <td className="px-4 py-3">R{item.unitCost}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -149,15 +125,15 @@ export const PurchaseView = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span>Subtotal</span>
-                        <span>R{purchase.subtotal}</span>
+                        <span>R{purchase.purchaseTotal}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>VAT</span>
-                        <span>{purchase.vat}</span>
+                        <span>{purchase.vat || "0"}</span>
                       </div>
                       <div className="flex justify-between font-semibold text-lg border-gray-200 border-t pt-2">
                         <span>Total</span>
-                        <span>R{purchase.total}</span>
+                        <span>R{purchase.purchaseTotal}</span>
                       </div>
                     </div>
                   </div>
@@ -169,10 +145,10 @@ export const PurchaseView = () => {
             <div className="lg:col-span-1">
               <Card className="p-6 bg-white hover:shadow-lg transition-shadow shadow-md border-b border-gray-200">
                 <h3 className="text-lg font-semibold mb-4">Receipt</h3>
-                {purchase.receiptImage ? (
+                {purchase.receipt ? (
                   <div className="space-y-4">
                     <img
-                      src={purchase.receiptImage}
+                      src={purchase.receipt}
                       alt="Purchase receipt"
                       className="w-full h-auto rounded-lg border border-gray-200 shadow-sm mb-4"
                     />

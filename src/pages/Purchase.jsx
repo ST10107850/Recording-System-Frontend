@@ -1,101 +1,48 @@
-import React, { useState } from "react";
+import React, {  useState } from "react";
 import Topbar from "../components/TopBar";
 import { Card } from "../components/ui/Card";
-import { Plus, Upload, X, Image } from "lucide-react"; // Ensure Image is imported
+import { Plus, Upload, X, Image } from "lucide-react";
 import { SupplierList } from "../components/SupplierList";
 import { AddItemForm } from "../components/AddItemForm";
+import { useCreatePurchase } from "../hooks/purchase/use-createPurchase";
 
 export const Purchase = () => {
-  const [purchaseItems, setPurchaseItems] = useState([
-    { id: 1, name: "Eggs", quantity: 60, amount: 140 },
-  ]);
-
-  const [selectedSupplier, setSelectedSupplier] = useState({
-    id: "1",
-    name: "Shoprite Flagstaff",
-    address: "Flagstaff Shopping Centre, Flagstaff",
-    phone: "047 491 0123",
-    type: "Supermarket",
-  });
-
-  const [showSupplierList, setShowSupplierList] = useState(false);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
-  const [receiptImage, setReceiptImage] = useState(null);
-  const [receiptPreview, setReceiptPreview] = useState(null);
 
-  const [predefinedItems, setPredefinedItems] = useState([
-    "Flour",
-    "Sugar",
-    "Eggs",
-    "Butter",
-    "Milk",
-    "Baking Powder",
-    "Vanilla Extract",
-    "Salt",
-    "Oil",
-    "Chocolate Chips",
-  ]);
-
-  const addPurchaseItem = () => {
-    const newItem = {
-      id: Date.now(),
-      name: "",
-      quantity: 0,
-      amount: 0,
-    };
-    setPurchaseItems([...purchaseItems, newItem]);
-  };
-
-  const removePurchaseItem = (id) => {
-    setPurchaseItems(purchaseItems.filter((item) => item.id !== id));
-  };
-
-  const updatePurchaseItem = (id, field, value) => {
-    setPurchaseItems(
-      purchaseItems.map((item) =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    );
-  };
-
-  const handleSupplierSelect = (supplier) => {
-    setSelectedSupplier(supplier);
-    setShowSupplierList(false);
-  };
-
-  const handleReceiptUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setReceiptImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setReceiptPreview(e.target?.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeReceipt = () => {
-    setReceiptImage(null);
-    setReceiptPreview(null);
-  };
-
-  const handleAddNewItem = (newItem) => {
-    setPredefinedItems((prev) => [...prev, newItem.name]);
-    console.log("New item added:", newItem);
-  };
-
-  const subtotal = purchaseItems.reduce((sum, item) => sum + item.amount, 0);
-  const vat = 0;
-  const total = subtotal + vat;
+  const {
+    purchaseItems,
+    selectedSupplier,
+    predefinedItems,
+    receiptPreview,
+    isLoading,
+    formError,
+    subtotal,
+    vat,
+    total,
+    addPurchaseItem,
+    removePurchaseItem,
+    updatePurchaseItem,
+    handleSupplierSelect,
+    handleReceiptUpload,
+    removeReceipt,
+    handleAddNewItem,
+    handleSavePurchase,
+    showSupplierList,
+    setShowSupplierList,
+  } = useCreatePurchase();
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Topbar title="Purchases - New Purchase" />
       <div className="p-6">
         <div className="max-w-4xl mx-auto">
+          {formError && (
+            <div className="mb-4 text-red-600 font-medium text-center">
+              {formError}
+            </div>
+          )}
+
           <Card className="p-8 hover:shadow-lg transition-shadow shadow-md border-b border-gray-200 bg-white">
-            {/* Supplier Section */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -107,7 +54,15 @@ export const Purchase = () => {
                   </div>
                   {selectedSupplier && (
                     <div className="text-sm text-gray-600 mt-1">
-                      {selectedSupplier.address}
+                      {selectedSupplier?.address
+                        ? [
+                            selectedSupplier.address.street,
+                            selectedSupplier.address.city,
+                            selectedSupplier.address.zip,
+                          ]
+                            .filter(Boolean)
+                            .join(", ")
+                        : "No address"}
                     </div>
                   )}
                 </div>
@@ -202,8 +157,8 @@ export const Purchase = () => {
                     <option value="" disabled>
                       Select or type item name
                     </option>
-                    {predefinedItems.map((itemName) => (
-                      <option key={itemName} value={itemName}>
+                    {predefinedItems.map((itemName, idx) => (
+                      <option key={`${itemName}-${idx}`} value={itemName}>
                         {itemName}
                       </option>
                     ))}
@@ -212,12 +167,12 @@ export const Purchase = () => {
                   <input
                     type="number"
                     placeholder="0"
-                    value={item.quantity}
+                    value={item.quantity === 0 ? "" : item.quantity}
                     onChange={(e) =>
                       updatePurchaseItem(
                         item.id,
                         "quantity",
-                        Number(e.target.value)
+                        e.target.value === "" ? 0 : Number(e.target.value)
                       )
                     }
                     className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
@@ -228,12 +183,12 @@ export const Purchase = () => {
                     <input
                       type="number"
                       placeholder="0"
-                      value={item.amount}
+                      value={item.amount === 0 ? "" : item.amount}
                       onChange={(e) =>
                         updatePurchaseItem(
                           item.id,
                           "amount",
-                          Number(e.target.value)
+                          e.target.value === "" ? 0 : Number(e.target.value)
                         )
                       }
                       className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
@@ -283,7 +238,11 @@ export const Purchase = () => {
 
             {/* Save Button */}
             <div className="flex justify-center mt-8">
-              <button className="bg-blue-400 hover:bg-blue-600 text-white px-16 py-3 rounded-full">
+              <button
+                onClick={handleSavePurchase}
+                disabled={isLoading}
+                className="bg-blue-400 hover:bg-blue-600 text-white px-16 py-3 rounded-full"
+              >
                 Save Purchase
               </button>
             </div>
