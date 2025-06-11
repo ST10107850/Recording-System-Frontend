@@ -1,62 +1,27 @@
 import { User, Mail, Phone, Shield, Eye, Edit, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Topbar from "../components/TopBar";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
-import { useNavigate } from "react-router";
 import ViewStaffModal from "../components/ViewStaffModal";
 import AddStaffForm from "../components/AddStaffForm";
 import EditStaffForm from "../components/EditStaffForm";
+import { useGetStaff } from "../hooks/staff/use-getStaff";
 
 export const Staff = () => {
-  const [staff] = useState([
-    {
-      id: 1,
-      name: "Lwazi Montuma",
-      email: "lwazi@doughbetter.com",
-      phone: "+27 71 234 5678",
-      role: "management",
-      department: "Administration",
-      status: "active",
-      joinDate: "2023-01-15",
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      email: "sarah@doughbetter.com",
-      phone: "+27 72 345 6789",
-      role: "supervisor",
-      department: "Production",
-      status: "active",
-      joinDate: "2023-03-20",
-    },
-    {
-      id: 3,
-      name: "Mike Williams",
-      email: "mike@doughbetter.com",
-      phone: "+27 73 456 7890",
-      role: "employee",
-      department: "Delivery",
-      status: "active",
-      joinDate: "2023-06-10",
-    },
-    {
-      id: 4,
-      name: "Lisa Brown",
-      email: "lisa@doughbetter.com",
-      phone: "+27 74 567 8901",
-      role: "employee",
-      department: "Production",
-      status: "inactive",
-      joinDate: "2023-02-28",
-    },
-  ]);
+  const {data ={}}= useGetStaff();
 
-  const navigate = useNavigate();
+  const [staff, setStaff] = useState([]);
 
-  const handleAddVendor = () => {
-    navigate("/staff/create");
-  };
+  useEffect(() => {
+    if (Array.isArray(data?.data)) {
+      setStaff(data.data);
+    }
+  }, [data]);
+  
+
+  
+ 
   const getRoleColor = (role) => {
     switch (role) {
       case "management":
@@ -70,11 +35,6 @@ export const Staff = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    return status === "active"
-      ? "bg-green-100 text-green-800"
-      : "bg-red-100 text-red-800";
-  };
 
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
@@ -86,25 +46,19 @@ export const Staff = () => {
   };
   const handleUpdateStaff = (updatedStaff) => {
     setStaff(prev => prev.map(member => 
-      member.id === updatedStaff.id ? updatedStaff : member
+      member._id === updatedStaff._id ? updatedStaff : member
     ));
     setSelectedStaff(null);
   };
 
-  const handleDeleteStaff = (id) => {
-    if (confirm("Are you sure you want to delete this staff member?")) {
-      setStaff(staff.filter(member => member.id !== id));
-    }
-  };
-
   const handleViewStaff = (id) => {
-    const staffMember = staff.find(member => member.id === id);
+    const staffMember = staff.find(member => member._id === id);
     setSelectedStaff(staffMember);
     setIsViewModalOpen(true);
   };
 
   const handleEditStaff = (id) => {
-    const staffMember = staff.find(member => member.id === id);
+    const staffMember = staff.find(member => member._id === id);
     setSelectedStaff(staffMember);
     setIsEditFormOpen(true);
   };
@@ -122,7 +76,7 @@ export const Staff = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {staff.map((member) => (
             <Card
-              key={member.id}
+              key={member._id}
               className="p-6 hover:shadow-lg transition-shadow shadow-md border-b border-gray-200 bg-white"
             >
               <div className="flex flex-col items-center text-center space-y-4">
@@ -137,14 +91,10 @@ export const Staff = () => {
 
                 <div className="space-y-2">
                   <h3 className="font-semibold text-gray-900">{member.name}</h3>
-                  <p className="text-sm text-gray-600">{member.department}</p>
 
                   <div className="flex gap-2 justify-center">
                     <Badge className={getRoleColor(member.role)}>
                       {member.role}
-                    </Badge>
-                    <Badge className={getStatusColor(member.status)}>
-                      {member.status}
                     </Badge>
                   </div>
                 </div>
@@ -156,12 +106,12 @@ export const Staff = () => {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Phone className="w-4 h-4" />
-                    <span>{member.phone}</span>
+                    <span>{member.phoneNumber || "Unknown"}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <User className="w-4 h-4" />
                     <span>
-                      Joined {new Date(member.joinDate).toLocaleDateString()}
+                      Joined: {new Date(member.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
@@ -170,7 +120,7 @@ export const Staff = () => {
                   <button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleViewStaff(member.id)}
+                    onClick={() => handleViewStaff(member._id)}
                     className="border border-gray-200 text-sm px-3 py-1 flex items-center justify-center rounded hover:bg-gray-50 transition w-full"
                   >
                     <Eye className="w-3 h-3" />
@@ -178,7 +128,7 @@ export const Staff = () => {
                   <button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleEditStaff(member.id)}
+                    onClick={() => handleEditStaff(member._id)}
                     className="border border-gray-200 text-sm px-3 py-1 flex items-center justify-center rounded hover:bg-gray-50 transition w-full"
                   >
                     <Edit className="w-3 h-3" />

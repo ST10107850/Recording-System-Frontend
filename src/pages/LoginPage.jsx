@@ -1,6 +1,6 @@
 import React from "react";
 import { FaUser, FaLock } from "react-icons/fa";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/staff/useAuth";
 
 export const LoginPage = () => {
   const { loginHandler, email, setEmail, password, setPassword } =

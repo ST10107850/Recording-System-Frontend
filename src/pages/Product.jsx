@@ -1,47 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
-import  Topbar  from "../components/TopBar";
+import {  Link } from "react-router-dom";
+import Topbar from "../components/TopBar";
 import AddProductForm from "../components/AddProductForm";
-// import AddProductForm from "@/components/AddProductForm";
-// import { Header } from "@/components/Header";
+import { useProduct } from "../hooks/product/use-product";
 
 export const Product = () => {
-  const navigate = useNavigate();
-  const [products, setProducts] = useState([
-    {
-      id: "1",
-      name: "Chocolate Chip Cookies",
-      description: "Delicious homemade chocolate chip cookies",
-      price: 25.99,
-      ingredients: [
-        { inventoryItemId: "1", inventoryItemName: "Flour", quantity: 2 },
-        { inventoryItemId: "2", inventoryItemName: "Sugar", quantity: 1 },
-        {
-          inventoryItemId: "3",
-          inventoryItemName: "Chocolate Chips",
-          quantity: 0.5,
-        },
-      ],
-      createdAt: "2024-01-15",
-    },
-    {
-      id: "2",
-      name: "Vanilla Cupcakes",
-      description: "Soft and fluffy vanilla cupcakes with buttercream frosting",
-      price: 35.5,
-      ingredients: [
-        { inventoryItemId: "1", inventoryItemName: "Flour", quantity: 1.5 },
-        { inventoryItemId: "4", inventoryItemName: "Butter", quantity: 0.3 },
-        {
-          inventoryItemId: "5",
-          inventoryItemName: "Vanilla Extract",
-          quantity: 0.1,
-        },
-      ],
-      createdAt: "2024-01-10",
-    },
-  ]);
+  const { data = {} } = useProduct();
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    if (Array.isArray(data.data)) {
+      setProducts(data.data);
+    }
+  }, [data.data]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
@@ -63,7 +35,7 @@ export const Product = () => {
 
   const handleDeleteProduct = (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      setProducts(products.filter((product) => product.id !== id));
+      setProducts(products.filter((product) => product._id !== id));
     }
   };
   return (
@@ -80,7 +52,7 @@ export const Product = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
             <div
-              key={product.id}
+              key={product._id}
               className="bg-white border border-gray-200 rounded-lg p-6 shadow hover:shadow-md transition-shadow"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -104,10 +76,11 @@ export const Product = () => {
                       className="flex justify-between items-center text-sm"
                     >
                       <span className="text-gray-600">
-                        {ingredient.inventoryItemName}
+                        {ingredient.inventoryItems?.itemName}
                       </span>
                       <span className="text-xs px-2 py-1 bg-gray-200 rounded">
-                        {ingredient.quantity} units
+                        {ingredient.quantity}{" "}
+                        {ingredient.inventoryItems?.unit || "units"}
                       </span>
                     </div>
                   ))}
@@ -120,10 +93,13 @@ export const Product = () => {
               </div>
 
               <div className="flex justify-between items-center pt-3 border-t border-gray-200 text-xs text-gray-500">
-                <span>Created: {product.createdAt}</span>
+                <span>
+                  Created:{" "}
+                  {new Date(product.createdAt).toLocaleDateString("en-GB")}
+                </span>
                 <div className="flex gap-1">
                   <Link
-                    to={`/products/${product.id}`}
+                    to={`/products/${product._id}`}
                     className="p-1 hover:bg-gray-100 rounded"
                   >
                     <Eye className="h-4 w-4" />

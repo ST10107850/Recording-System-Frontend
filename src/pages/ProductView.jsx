@@ -1,37 +1,16 @@
-import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Edit, Trash2, ArrowLeft } from "lucide-react";
 import Topbar from "../components/TopBar";
+import { useGetProductByIdQuery } from "../features/user/product-slice";
 
 const ProductView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
 
-  useEffect(() => {
- 
-    const fetchedProduct = {
-      id,
-      name: "Chocolate Chip Cookies",
-      description:
-        "Delicious homemade chocolate chip cookies made with premium ingredients",
-      price: 25.99,
-      ingredients: [
-        { inventoryItemId: "1", inventoryItemName: "Flour", quantity: 2 },
-        { inventoryItemId: "2", inventoryItemName: "Sugar", quantity: 1 },
-        {
-          inventoryItemId: "3",
-          inventoryItemName: "Chocolate Chips",
-          quantity: 0.5,
-        },
-      ],
-      createdAt: "2024-01-15",
-    };
-
-    setProduct(fetchedProduct);
-  }, [id]);
+  const { data } = useGetProductByIdQuery(id);
+  const fetchedProducts = data?.data || {};
 
   const handleEdit = () => {
     navigate(`/products/${id}/edit`);
@@ -44,7 +23,7 @@ const ProductView = () => {
     }
   };
 
-  if (!product) return <div className="p-6">Loading...</div>;
+  if (!fetchedProducts) return <div className="p-6">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,9 +44,11 @@ const ProductView = () => {
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {product.name}
+                  {fetchedProducts.name}
                 </h1>
-                <p className="text-gray-600 text-lg">{product.description}</p>
+                <p className="text-gray-600 text-lg">
+                  {fetchedProducts.description}
+                </p>
               </div>
               <div className="flex space-x-2">
                 <button
@@ -96,12 +77,14 @@ const ProductView = () => {
                   <div>
                     <span className="text-sm text-gray-500">Price</span>
                     <p className="text-2xl font-bold text-green-600">
-                      R{product.price.toFixed(2)}
+                      R{fetchedProducts.price}
                     </p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">Created Date</span>
-                    <p className="text-gray-900">{product.createdAt}</p>
+                    <p className="text-gray-900">
+                      {fetchedProducts.createdAt || "Unknown"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -109,16 +92,17 @@ const ProductView = () => {
               <div>
                 <h2 className="text-xl font-semibold mb-4">Ingredients</h2>
                 <div className="space-y-3">
-                  {product.ingredients.map((ingredient, index) => (
+                  {fetchedProducts.ingredients?.map((ingredient, index) => (
                     <div
                       key={index}
                       className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
                     >
                       <span className="font-medium truncate max-w-[60%]">
-                        {ingredient.inventoryItemName}
+                        {ingredient.inventoryItems.itemName}
                       </span>
                       <Badge variant="secondary">
-                        {ingredient.quantity} units
+                        {ingredient.quantity}{" "}
+                        {ingredient.inventoryItems.unit || "Unit"}
                       </Badge>
                     </div>
                   ))}

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useLoginMutation } from "../features/user/userSlice";
-import { setCredentials } from "../features/auth/authApiSlice";
-import { useToast } from "../hooks/use-toast";
+import { useLoginMutation } from "../../features/user/userSlice";
+import { setCredentials } from "../../features/auth/authApiSlice";
+import { useToast } from "../../hooks/use-toast";
 
 export const useAuth = () => {
   const [email, setEmail] = useState("");

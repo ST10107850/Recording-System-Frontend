@@ -3,7 +3,7 @@ import { useToast } from "./use-toast";
 import { useNavigate } from "react-router-dom";
 import { useCreateVendorMutation } from "../features/user/vendorSlice";
 
-export const useVendor = () => {
+export const useCreateVendor = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");

@@ -2,7 +2,6 @@ import "./App.css";
 import { Toaster } from "./components/ui/toaster";
 import { Toaster as Sonner } from "./components/ui/sonner";
 import { LoginPage } from "./pages/LoginPage";
-import { CreateVendors } from "./components/createVendors";
 import { Routes, Route } from "react-router-dom";
 import Layout from "./layout/Layout";
 import { Dashboard } from "./pages/Dashboard";
@@ -33,7 +32,6 @@ function App() {
 
         <Route path="/" element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/vendors/create" element={<CreateVendors />} />
           <Route path="/vendors" element={<Vendors />} />
           <Route path="/resellers" element={<Resellers />} />
           <Route path="/staff" element={<Staff />} />

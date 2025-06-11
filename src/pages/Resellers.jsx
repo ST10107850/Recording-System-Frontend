@@ -10,65 +10,72 @@ import {
   Eye,
   Edit,
   Trash2,
+  Building2,
+  Gift,
 } from "lucide-react";
 import { Badge } from "../components/ui/Badge";
 import AddResellerForm from "../components/AddResellerForm";
 import ViewResellerModal from "../components/ViewResellerModal";
 import EditResellerForm from "../components/EditResellerForm ";
+import { Progress } from "../components/ui/Progress";
 
 const Resellers = () => {
   const [resellers, setResellers] = useState([
     {
-      id: 1,
-      name: "Sweet Treats Café",
-      contact: "Jenny Smith",
+      id: "1",
+      shopName: "Sweet Treats Café",
+      name: "Jenny Smith",
       email: "jenny@sweettreats.co.za",
-      phone: "+27 21 555 0123",
+      contact: "+27 21 555 0123",
       address: "123 Main Street, Cape Town",
+      vatNo: "VAT001",
       status: "active",
-      commission: 15,
       totalSales: 45000,
-      thisMonth: 20,
-      products: ["Cupcakes", "Muffins", "Scones"],
+      thisMonth: 8500,
+      salesCount: 12,
+      discountEarned: false,
     },
     {
-      id: 2,
-      name: "Corner Bakery",
-      contact: "David Williams",
+      id: "2",
+      shopName: "Corner Bakery",
+      name: "David Williams",
       email: "david@cornerbakery.co.za",
-      phone: "+27 21 555 0456",
+      contact: "+27 21 555 0456",
       address: "456 Oak Avenue, Stellenbosch",
+      vatNo: "VAT002",
       status: "active",
-      commission: 12,
       totalSales: 32000,
-      thisMonth: 10,
-      products: ["Bread", "Pastries", "Cakes"],
+      thisMonth: 6200,
+      salesCount: 18,
+      discountEarned: true,
     },
     {
-      id: 3,
-      name: "Gourmet Delights",
-      contact: "Maria Garcia",
+      id: "3",
+      shopName: "Gourmet Delights",
+      name: "Maria Garcia",
       email: "maria@gourmetdelights.co.za",
-      phone: "+27 21 555 0789",
+      contact: "+27 21 555 0789",
       address: "789 Pine Road, Paarl",
+      vatNo: "VAT003",
       status: "pending",
-      commission: 18,
       totalSales: 28500,
-      thisMonth: 5,
-      products: ["Artisan Breads", "Croissants", "Macarons"],
+      thisMonth: 4800,
+      salesCount: 10,
+      discountEarned: false,
     },
     {
-      id: 4,
-      name: "Local Market Stand",
-      contact: "Peter Johnson",
+      id: "4",
+      shopName: "Local Market Stand",
+      name: "Peter Johnson",
       email: "peter@localmarket.co.za",
-      phone: "+27 21 555 0321",
+      contact: "+27 21 555 0321",
       address: "321 Market Square, Somerset West",
+      vatNo: "VAT004",
       status: "inactive",
-      commission: 10,
       totalSales: 15000,
-      thisMonth: 2,
-      products: ["Scones", "Muffins"],
+      thisMonth: 0,
+      salesCount: 3,
+      discountEarned: false,
     },
   ]);
 
@@ -76,18 +83,24 @@ const Resellers = () => {
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedReseller, setSelectedReseller] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "inactive":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const filteredResellers = resellers.filter(
+    (reseller) =>
+      reseller.shopName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reseller.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const calculateDiscountProgress = (salesCount) => {
+    const targetSales = 15;
+    return Math.min((salesCount / targetSales) * 100, 100);
+  };
+
+  const getDiscountStatus = (salesCount) => {
+    if (salesCount >= 15) {
+      return { eligible: true, remaining: 0 };
     }
+    return { eligible: false, remaining: 15 - salesCount };
   };
 
   const handleAddReseller = (newReseller) => {
@@ -111,126 +124,137 @@ const Resellers = () => {
 
   const handleViewReseller = (id) => {
     const reseller = resellers.find((reseller) => reseller.id === id);
-    setSelectedReseller(reseller);
+    setSelectedReseller(reseller || null);
     setIsViewModalOpen(true);
   };
 
   const handleEditReseller = (id) => {
     const reseller = resellers.find((reseller) => reseller.id === id);
-    setSelectedReseller(reseller);
+    setSelectedReseller(reseller || null);
     setIsEditFormOpen(true);
   };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Topbar
         title="Reseller Management"
         showSearch={true}
         showAddButton={true}
+        onSearchChange={(term) => setSearchTerm(term)}
         addButtonText="Add Reseller"
         onAddClick={() => setIsAddFormOpen(true)}
       />
 
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {resellers.map((reseller) => (
-            <Card
-              key={reseller.id}
-              className="p-6 hover:shadow-lg transition-shadow shadow-md border-b border-gray-200 bg-white"
-            >
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-lg">
-                      {reseller.name}
-                    </h3>
-                    <p className="text-sm text-gray-600">{reseller.contact}</p>
-                  </div>
-                  <Badge className={getStatusColor(reseller.status)}>
-                    {reseller.status}
-                  </Badge>
-                </div>
+          {filteredResellers.length === 0 ? (
+            <div className="col-span-1 lg:col-span-2 xl:col-span-3 text-center text-gray-500">
+              No resellers found matching your search criteria.
+            </div>
+          ) : (
+            filteredResellers.map((customer) => {
+              const discountProgress = calculateDiscountProgress(
+                customer.salesCount
+              );
+              const discountStatus = getDiscountStatus(customer.salesCount);
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Mail className="w-4 h-4" />
-                    <span className="truncate">{reseller.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Phone className="w-4 h-4" />
-                    <span>{reseller.phone}</span>
-                  </div>
-                  <div className="flex items-start gap-2 text-sm text-gray-600">
-                    <MapPin className="w-4 h-4 mt-0.5" />
-                    <span>{reseller.address}</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 py-3 border-t border-gray-100">
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-gray-900">
-                      R {reseller.totalSales.toLocaleString()}
-                    </div>
-                    <div className="text-xs text-gray-500">Total Sales</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-green-600">
-                      {reseller.thisMonth.toLocaleString()}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Total Number of Sales
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <TrendingUp className="w-4 h-4 text-blue-600" />
-                    <span className="text-gray-600">
-                      Commission: {reseller.commission}%
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <Package className="w-4 h-4 text-purple-600 mt-0.5" />
-                    <div>
-                      <div className="text-gray-600 mb-1">Products:</div>
-                      <div className="flex flex-wrap gap-1">
-                        {reseller.products.map((product, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {product}
+              return (
+                <Card
+                  key={customer.id}
+                  className="p-6 hover:shadow-lg transition-shadow shadow-md border-b border-gray-200 bg-white"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-lg">
+                          {customer.shopName || customer.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">{customer.name}</p>
+                        {customer.vatNo && (
+                          <p className="text-xs text-gray-500">
+                            VAT: {customer.vatNo}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {discountStatus.eligible && (
+                          <Badge className="bg-purple-100 text-purple-800">
+                            <Gift className="w-3 h-3 mr-1" />
+                            Discount Eligible
                           </Badge>
-                        ))}
+                        )}
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="flex pt-3  border-t justify-between border-gray-100">
-                  <button
-                    onClick={() => handleViewReseller(reseller.id)}
-                    className="border border-gray-200 text-sm px-3 py-1 flex items-center gap-2 rounded hover:bg-gray-50 transition"
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    View
-                  </button>
-                  <button
-                    onClick={() => handleEditReseller(reseller.id)}
-                    className="border border-gray-200 text-sm px-6 py-2 flex items-center gap-2 rounded hover:bg-gray-50 transition"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Edit
-                  </button>
-                  <button className="border border-gray-200 text-sm text-red-500 px-6 py-2 flex items-center gap-2 rounded hover:bg-gray-50 transition">
-                    <Trash2 className="w-4 h-4 mr-1" />
-                  </button>
-                </div>
-              </div>
-            </Card>
-          ))}
+                    {/* Discount Progress Section */}
+                    <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">
+                          Discount Progress
+                        </span>
+                        <span className="text-sm text-gray-600">
+                          {customer.salesCount}/15 sales
+                        </span>
+                      </div>
+                      <Progress value={discountProgress} className="h-2" />
+                      <div className="text-xs text-gray-500">
+                        {discountStatus.eligible
+                          ? "🎉 Eligible for 10% discount on next purchase!"
+                          : `${discountStatus.remaining} more sales needed for discount`}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {customer.email && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Mail className="w-4 h-4" />
+                          <span className="truncate">{customer.email}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Phone className="w-4 h-4" />
+                        <span>{customer.contact}</span>
+                      </div>
+                      {customer.address && (
+                        <div className="flex items-start gap-2 text-sm text-gray-600">
+                          <MapPin className="w-4 h-4 mt-0.5" />
+                          <span>{customer.address}</span>
+                        </div>
+                      )}
+                      {customer.shopName && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Building2 className="w-4 h-4" />
+                          <span>Shop: {customer.shopName}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex pt-3  border-t justify-between border-gray-100">
+                      <button
+                        onClick={() => handleViewReseller(customer.id)}
+                        className="border border-gray-200 text-sm px-3 py-1 flex items-center gap-2 rounded hover:bg-gray-50 transition"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </button>
+                      <button
+                        onClick={() => handleEditReseller(customer.id)}
+                        className="border border-gray-200 text-sm px-6 py-2 flex items-center gap-2 rounded hover:bg-gray-50 transition"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={handleDeleteReseller}
+                        className="border border-gray-200 text-sm text-red-500 px-6 py-2 flex items-center gap-2 rounded hover:bg-gray-50 transition"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                      </button>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })
+          )}
         </div>
       </div>
       <AddResellerForm

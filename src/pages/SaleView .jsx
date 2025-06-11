@@ -4,39 +4,20 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
+} from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import Topbar from "../components/TopBar";
+import { useGetSaleByIdQuery } from "../features/user/sale-slice";
 
 const SaleView = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
 
-  // Mock data - replace with actual data fetching
-  const mockSale = {
-    id: id || "1",
-    customer: { id: "1", name: "John Doe", email: "john@example.com" },
-    products: [
-      {
-        product: { id: "1", name: "Chocolate Cake" },
-        quantity: 2,
-        productTotal: 500,
-      },
-      {
-        product: { id: "2", name: "Vanilla Cupcakes" },
-        quantity: 1,
-        productTotal: 150,
-      },
-    ],
-    total: 650,
-    invoiceNo: "INV-1703123456789",
-    date: "2024-01-15",
-    recordedBy: { id: "1", name: "Admin User" },
-    createdAt: "2024-01-15T10:30:00Z",
-  };
+  const { data, isLoading, isError } = useGetSaleByIdQuery(id);
+  const sale = data?.data;
 
   const handleDelete = () => {
     if (window.confirm("Are you sure you want to delete this sale?")) {
@@ -47,13 +28,26 @@ const SaleView = () => {
       navigate("/sales");
     }
   };
+
   const buttonBaseClass =
     "inline-flex items-center gap-2 px-3 py-1.5 border rounded text-sm font-medium cursor-pointer";
+
+  if (isLoading) {
+    return <div className="p-6">Loading sale data...</div>;
+  }
+
+  if (isError || !sale) {
+    return (
+      <div className="p-6 text-red-600">
+        Failed to load sale data. Please try again later.
+      </div>
+    );
+  }
 
   return (
     <div>
       <Topbar
-        title={`Sale No. ${mockSale.id}`}
+        title={`Sale No. ${sale.invoiceNo}`}
         showSearch={false}
         showAddButton={false}
       />
@@ -93,11 +87,7 @@ const SaleView = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <Card
-              className={
-                "hover:shadow-lg transition-shadow shadow-md border-b border-gray-200 bg-white"
-              }
-            >
+            <Card className="hover:shadow-lg transition-shadow shadow-md border-b border-gray-200 bg-white">
               <CardHeader>
                 <CardTitle>Sale Information</CardTitle>
               </CardHeader>
@@ -107,32 +97,30 @@ const SaleView = () => {
                     <p className="text-sm font-medium text-gray-500">
                       Invoice Number
                     </p>
-                    <p className="text-lg font-semibold">
-                      {mockSale.invoiceNo}
-                    </p>
+                    <p className="text-lg font-semibold">{sale.invoiceNo}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">
                       Sale Date
                     </p>
                     <p className="text-lg">
-                      {new Date(mockSale.date).toLocaleDateString()}
+                      {new Date(sale.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">
                       Customer
                     </p>
-                    <p className="text-lg">{mockSale.customer.name}</p>
+                    <p className="text-lg">{sale.customer?.name}</p>
                     <p className="text-sm text-gray-600">
-                      {mockSale.customer.email}
+                      {sale.customer?.email || sale.customer?.contact}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">
                       Recorded By
                     </p>
-                    <p className="text-lg">{mockSale.recordedBy.name}</p>
+                    <p className="text-lg">{sale.recordedBy?.name}</p>
                   </div>
                 </div>
               </CardContent>
@@ -144,7 +132,7 @@ const SaleView = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockSale.products.map((item, index) => (
+                  {sale.products?.map((item, index) => (
                     <div
                       key={index}
                       className="flex justify-between items-center p-4 border border-gray-200 rounded-lg"
@@ -167,7 +155,7 @@ const SaleView = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-xl font-bold">Total:</span>
                       <span className="text-xl font-bold">
-                        R{mockSale.total.toFixed(2)}
+                        R{sale.total?.toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -194,7 +182,7 @@ const SaleView = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-500">Created</p>
                   <p className="text-sm">
-                    {new Date(mockSale.createdAt).toLocaleString()}
+                    {new Date(sale.createdAt).toLocaleString()}
                   </p>
                 </div>
                 <div>
@@ -202,7 +190,7 @@ const SaleView = () => {
                     Items Count
                   </p>
                   <p className="text-lg font-semibold">
-                    {mockSale.products.length}
+                    {sale.products?.length}
                   </p>
                 </div>
                 <div>
@@ -210,7 +198,7 @@ const SaleView = () => {
                     Total Quantity
                   </p>
                   <p className="text-lg font-semibold">
-                    {mockSale.products.reduce(
+                    {sale.products.reduce(
                       (sum, item) => sum + item.quantity,
                       0
                     )}

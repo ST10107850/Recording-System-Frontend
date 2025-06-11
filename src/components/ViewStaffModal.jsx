@@ -74,7 +74,6 @@ const ViewStaffModal = ({ isOpen, onClose, staff }) => {
               <h3 className="text-xl font-semibold text-gray-900">
                 {staff.name}
               </h3>
-              <p className="text-gray-600">{staff.department}</p>
 
               <div className="flex gap-2 justify-center">
                 <span
@@ -83,13 +82,6 @@ const ViewStaffModal = ({ isOpen, onClose, staff }) => {
                   )}`}
                 >
                   {staff.role}
-                </span>
-                <span
-                  className={`px-2 py-1 rounded text-sm font-medium ${getStatusColor(
-                    staff.status
-                  )}`}
-                >
-                  {staff.status}
                 </span>
               </div>
             </div>
@@ -102,7 +94,7 @@ const ViewStaffModal = ({ isOpen, onClose, staff }) => {
             </div>
             <div className="flex items-center gap-3">
               <Phone className="w-5 h-5 text-gray-400" />
-              <span>{staff.phone}</span>
+              <span>{staff.phoneNumber || "Unknown"}</span>
             </div>
             <div className="flex items-center gap-3">
               <Shield className="w-5 h-5 text-gray-400" />
@@ -111,7 +103,7 @@ const ViewStaffModal = ({ isOpen, onClose, staff }) => {
             <div className="flex items-center gap-3">
               <Calendar className="w-5 h-5 text-gray-400" />
               <span>
-                Joined {new Date(staff.joinDate).toLocaleDateString()}
+                Joined: {new Date(staff.createdAt).toLocaleDateString()}
               </span>
             </div>
           </div>

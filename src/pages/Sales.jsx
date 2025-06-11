@@ -1,50 +1,23 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router";
 import Topbar from "../components/TopBar";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { AddSaleForm } from "../components/AddSaleForm";
+import { useSale } from "../hooks/sales/use-sale";
 
 export const Sales = () => {
-  const navigate = useNavigate();
-  const [sales, setSales] = useState([
-    {
-      id: "1",
-      customer: { id: "1", name: "Ngwabeni Methodist Church" },
-      products: [
-        {
-          product: { id: "1", name: "Scones" },
-          quantity: 10,
-          productTotal: 400,
-        },
-      ],
-      total: 400,
-      recordedBy: { id: "1", name: "John Doe" },
-      date: "2024-01-15",
-      invoiceNo: "SI20134",
-    },
-    {
-      id: "2",
-      customer: { id: "2", name: "Local Bakery" },
-      products: [
-        {
-          product: { id: "2", name: "Chocolate Chip Cookies" },
-          quantity: 5,
-          productTotal: 129.95,
-        },
-        {
-          product: { id: "1", name: "Scones" },
-          quantity: 10,
-          productTotal: 400,
-        },
-      ],
-      total: 129.95,
-      recordedBy: { id: "1", name: "John Doe" },
-      date: "2024-01-14",
-      invoiceNo: "SI20135",
-    },
-  ]);
+  const { data = {} } = useSale();
+
+
+  const [sales, setSales] = useState([]);
+
+  useEffect(() => {
+    if (Array.isArray(data.data)) {
+      setSales(data.data);
+    }
+  }, [data.data]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
@@ -86,6 +59,7 @@ export const Sales = () => {
       <Topbar
         title="Sales"
         showSearch={true}
+        onSearchChange={(term) => setSearchTerm(term)}
         showAddButton={true}
         addButtonText="Add Sale"
         onAddClick={() => setIsAddFormOpen(true)}
@@ -139,7 +113,7 @@ export const Sales = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredSales.map((sale) => (
-                  <tr key={sale.id} className="hover:bg-gray-50">
+                  <tr key={sale._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 font-medium text-gray-900">
                       {sale.invoiceNo}
                     </td>
@@ -167,26 +141,28 @@ export const Sales = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">{sale.date}</td>
+                    <td className="px-6 py-4">
+                      {new Date(sale.createdAt).toLocaleDateString("en-GB")}
+                    </td>
                     <td className="px-6 py-4 font-semibold text-green-600">
                       R{sale.total.toFixed(2)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
                         <Link
-                          to={`/sales/${sale.id}`}
+                          to={`/sales/${sale._id}`}
                           className="p-1 hover:bg-gray-100 rounded"
                         >
                           <Eye className="h-4 w-4" />
                         </Link>
                         <Link
-                          to={`/sales/${sale.id}/edit`}
+                          to={`/sales/${sale._id}/edit`}
                           className="text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-100"
                         >
                           <Edit className="h-4 w-4" />
                         </Link>
                         <button
-                          onClick={() => handleDeleteSale(sale.id)}
+                          onClick={() => handleDeleteSale(sale._id)}
                           className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-gray-100"
                         >
                           <Trash2 className="h-4 w-4" />
