@@ -1,5 +1,3 @@
-import React from "react";
-import { Badge } from "../components/ui/Badge";
 import { MapPin, Phone, Mail, X, Building2, Package } from "lucide-react";
 
 const ViewResellerModal = ({ isOpen, onClose, reseller }) => {
@@ -125,7 +123,6 @@ const ViewResellerModal = ({ isOpen, onClose, reseller }) => {
                         {
                           product,
                           quantity,
-                          unitPrice,
                           productTotal,
                           saleDate,
                         },
@@ -139,7 +136,7 @@ const ViewResellerModal = ({ isOpen, onClose, reseller }) => {
                             {quantity || 0}
                           </td>
                           <td className="text-right px-4 py-2">
-                            R {unitPrice?.toFixed(2) || "0.00"}
+                            R {product?.price?.toFixed(2) || "0.00"}
                           </td>
                           <td className="text-right px-4 py-2 font-semibold">
                             R {productTotal?.toFixed(2) || "0.00"}

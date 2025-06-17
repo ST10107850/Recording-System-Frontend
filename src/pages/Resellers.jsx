@@ -25,21 +25,21 @@ const Resellers = () => {
     () => (Array.isArray(data.data) ? data.data : []),
     [data.data]
   );
-
+  
   const [resellers, setResellers] = useState([]);
 
   useEffect(() => {
     setResellers(resellersData);
   }, [resellersData]);
 
-  // UI state
+
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedReseller, setSelectedReseller] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Filter resellers by shopName or customer name
+
   const filteredResellers = resellers.filter((reseller) => {
     const shopName = reseller.customer?.shopName?.toLowerCase() || "";
     const name = reseller.customer?.name?.toLowerCase() || "";
@@ -49,13 +49,13 @@ const Resellers = () => {
     );
   });
 
-  // Calculate discount progress (out of 15 sales)
+
   const calculateDiscountProgress = (salesCount) => {
     const targetSales = 15;
     return Math.min((salesCount / targetSales) * 100, 100);
   };
 
-  // Check discount eligibility
+
   const getDiscountStatus = (salesCount) => {
     if (salesCount >= 15) {
       return { eligible: true, remaining: 0 };
@@ -63,7 +63,7 @@ const Resellers = () => {
     return { eligible: false, remaining: 15 - salesCount };
   };
 
-  // Handlers
+
   const handleAddReseller = (newReseller) => {
     setResellers((prev) => [...prev, newReseller]);
   };

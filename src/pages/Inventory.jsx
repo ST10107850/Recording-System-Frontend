@@ -117,13 +117,7 @@ const Inventory = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Min Level:</span>
                 <span className="text-gray-900">
-                  {item.minStockLevel} {item.unit}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Unit Cost:</span>
-                <span className="text-gray-900 font-medium">
-                  R{item.unitCost.toFixed(2)}
+                  {item.minStockLevel} {item.unit || "unit"}
                 </span>
               </div>
             </div>

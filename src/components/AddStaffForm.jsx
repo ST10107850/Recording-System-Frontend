@@ -1,32 +1,8 @@
-import { useState } from "react";
+import { useAddStaffForm } from "../hooks/staff/use-createStaff";
 
-const AddStaffForm = ({ isOpen, onClose, onAddStaff }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    role: "employee",
-    department: "",
-    status: "active",
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onAddStaff({
-      ...formData,
-      id: Date.now(),
-      joinDate: new Date().toISOString().split("T")[0],
-    });
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      role: "employee",
-      department: "",
-      status: "active",
-    });
-    onClose();
-  };
+const AddStaffForm = ({ isOpen, onClose }) => {
+  const { formData, saving, handleInputChange, handleSubmit } =
+    useAddStaffForm(onClose);
 
   if (!isOpen) return null;
 
@@ -52,12 +28,8 @@ const AddStaffForm = ({ isOpen, onClose, onAddStaff }) => {
               Full Name
             </label>
             <input
-              id="name"
-              type="text"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => handleInputChange("name", e.target.value)}
               required
               className="w-full border border-gray-300 rounded px-3 py-2"
             />
@@ -68,28 +40,9 @@ const AddStaffForm = ({ isOpen, onClose, onAddStaff }) => {
               Email
             </label>
             <input
-              id="email"
               type="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              required
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="phone" className="block font-medium mb-1">
-              Phone
-            </label>
-            <input
-              id="phone"
-              type="text"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
+              onChange={(e) => handleInputChange("email", e.target.value)}
               required
               className="w-full border border-gray-300 rounded px-3 py-2"
             />
@@ -100,53 +53,13 @@ const AddStaffForm = ({ isOpen, onClose, onAddStaff }) => {
               Role
             </label>
             <select
-              id="role"
               value={formData.role}
-              onChange={(e) =>
-                setFormData({ ...formData, role: e.target.value })
-              }
+              onChange={(e) => handleInputChange("role", e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-2"
             >
               <option value="management">Management</option>
               <option value="supervisor">Supervisor</option>
               <option value="employee">Employee</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="department" className="block font-medium mb-1">
-              Department
-            </label>
-            <select
-              id="department"
-              value={formData.department}
-              onChange={(e) =>
-                setFormData({ ...formData, department: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            >
-              <option value="">Select department</option>
-              <option value="Administration">Administration</option>
-              <option value="Production">Production</option>
-              <option value="Delivery">Delivery</option>
-              <option value="Sales">Sales</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="status" className="block font-medium mb-1">
-              Status
-            </label>
-            <select
-              id="status"
-              value={formData.status}
-              onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded px-3 py-2"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
             </select>
           </div>
 
@@ -162,7 +75,7 @@ const AddStaffForm = ({ isOpen, onClose, onAddStaff }) => {
               type="submit"
               className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white rounded hover:cursor-pointer"
             >
-              Add Staff
+              {saving ? "Saving…" : "Add Staff"}
             </button>
           </div>
         </form>

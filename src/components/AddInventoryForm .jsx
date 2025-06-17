@@ -6,7 +6,6 @@ const AddInventoryForm = ({ isOpen, onClose, onAddItem }) => {
     category: "ingredients",
     quantity: 0,
     minStockLevel: 0,
-    unitCost: 0,
     createdBy: "John Doe",
   });
 
@@ -19,7 +18,6 @@ const AddInventoryForm = ({ isOpen, onClose, onAddItem }) => {
         category: "ingredients",
         quantity: 0,
         minStockLevel: 0,
-        unitCost: 0,
         createdBy: "John Doe",
       });
       onClose();
@@ -120,7 +118,7 @@ const AddInventoryForm = ({ isOpen, onClose, onAddItem }) => {
             </div>
           </div>
 
-          <div>
+          {/* <div>
             <label
               htmlFor="unitCost"
               className="block font-medium text-sm text-gray-700 mb-1"
@@ -138,7 +136,7 @@ const AddInventoryForm = ({ isOpen, onClose, onAddItem }) => {
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="0"
             />
-          </div>
+          </div> */}
 
           <div className="flex justify-end space-x-2 pt-4">
             <button

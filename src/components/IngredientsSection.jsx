@@ -3,6 +3,7 @@ import IngredientSelector from "./IngredientSelector";
 const IngredientsSection = ({
   ingredients,
   inventoryItems,
+  invLoading,
   onAddIngredient,
   onUpdateIngredient,
   onRemoveIngredient,
@@ -14,9 +15,10 @@ const IngredientsSection = ({
         <button
           type="button"
           onClick={onAddIngredient}
-          className="border border-gray-300 text-sm px-3 py-1 rounded-md hover:bg-gray-100 flex items-center"
+          disabled={invLoading || inventoryItems.length === 0}
+          className="border border-gray-300 text-sm px-3 py-1 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span className="mr-1">＋</span> Add Ingredient
+          ＋ Add Ingredient
         </button>
       </div>
 
@@ -26,6 +28,7 @@ const IngredientsSection = ({
           ingredient={ingredient}
           index={index}
           inventoryItems={inventoryItems}
+          invLoading={invLoading}
           onUpdate={onUpdateIngredient}
           onRemove={onRemoveIngredient}
         />

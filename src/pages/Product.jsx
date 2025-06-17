@@ -8,7 +8,7 @@ import { useProduct } from "../hooks/product/use-product";
 export const Product = () => {
   const { data = {} } = useProduct();
   const [products, setProducts] = useState([]);
-
+  
   useEffect(() => {
     if (Array.isArray(data.data)) {
       setProducts(data.data);

@@ -138,7 +138,7 @@ const SaleView = () => {
                       className="flex justify-between items-center p-4 border border-gray-200 rounded-lg"
                     >
                       <div className="flex-1">
-                        <h3 className="font-medium">{item.product.name}</h3>
+                        <h3 className="font-medium">{item.product?.name}</h3>
                         <p className="text-sm text-gray-600">
                           Quantity: {item.quantity}
                         </p>

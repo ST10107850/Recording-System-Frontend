@@ -23,7 +23,20 @@ export const userSlice = apiSlice.injectEndpoints({
       query: () => `${USER_URL}`,
       providesTags: ["auth"],
     }),
+    createUser: builder.mutation({
+      query: (data) => ({
+        url: `${USER_URL}/create`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Task"],
+    }),
   }),
 });
 
-export const { useLoginMutation, useLogoutMutation, useGetUserQuery} = userSlice;
+export const {
+  useLoginMutation,
+  useLogoutMutation,
+  useGetUserQuery,
+  useCreateUserMutation,
+} = userSlice;

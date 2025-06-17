@@ -1,40 +1,11 @@
-import React, { useState } from "react";
+import { useAddInventoryForm } from "../hooks/inventory/use-createInventory";
 
-export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
-  const [formData, setFormData] = useState({
-    itemName: "",
-    category: "",
-    quantity: 0,
-    minStockLevel: 0,
-    unitCost: 0,
-    unit: "",
-  });
+const CATEGORIES = ["consumable", "ppe", "ingredients"];
+const UNITS = ["kg", "g", "litre", "ml", "pcs"];
 
-  const categories = ["consumable", "ppe", "ingredients"];
-  const units = ["kg", "liters", "pieces", "grams", "ml", "boxes", "packs"];
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.itemName && formData.category && formData.unit) {
-      onAddItem(formData);
-      setFormData({
-        itemName: "",
-        category: "",
-        quantity: 0,
-        unitCost: 0,
-        minStockLevel: 0,
-        unit: "",
-      });
-      onClose();
-    }
-  };
-
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+export const AddItemForm = ({ isOpen, onClose }) => {
+  const { formData, saving, handleInputChange, handleSubmit } =
+    useAddInventoryForm(onClose);
 
   if (!isOpen) return null;
 
@@ -76,7 +47,7 @@ export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
             >
               <option value="">Select category</option>
-              {categories.map((category) => (
+              {CATEGORIES.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -125,28 +96,6 @@ export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
             />
           </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="unitCost"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Unit Cost
-            </label>
-            <input
-              id="unitCost"
-              type="number"
-              value={formData.unitCost || ""}
-              onChange={(e) =>
-                handleInputChange("unitCost", Number(e.target.value))
-              }
-              placeholder="0"
-              min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-            />
-          </div>
-
-          {/* Unit */}
           <div className="space-y-2">
             <label
               htmlFor="unit"
@@ -161,7 +110,7 @@ export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
             >
               <option value="">Select unit</option>
-              {units.map((unit) => (
+              {UNITS.map((unit) => (
                 <option key={unit} value={unit}>
                   {unit}
                 </option>
@@ -182,7 +131,7 @@ export const AddItemForm = ({ isOpen, onClose, onAddItem }) => {
               type="submit"
               className="px-4 py-2 bg-blue-400 text-white rounded-md text-sm hover:bg-blue-700"
             >
-              Add Item
+              {saving ? "Saving…" : "Add Item"}
             </button>
           </div>
         </form>

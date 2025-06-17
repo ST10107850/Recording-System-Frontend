@@ -1,69 +1,31 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import Topbar from "../components/TopBar";
 import AddTaskForm from "../components/AddTaskForm";
-// import AddTaskForm from "@/components/AddTaskForm";
+import { Badge } from "../components/ui/Badge";
+import { useGetTasksQuery } from "../features/user/task-slice";
 
 const Tasks = () => {
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      date: "12/10/2023",
-      taskNo: "SI20134",
-      type: "Delivery",
-      description:
-        "Deliver 2x 10L Scone to Ngwabeni Methodist Church by 10:30 am on Sunday 13 October 2023. The person you will deliver to is Mrs Abrahams",
-      deadline: "13/10/2023 at 10:30am",
-      allocatedBy: "L Montuma",
-      assignedTo: "3",
-      assignedStaffName: "Mike Williams",
-      status: "Assigned",
-    },
-    {
-      id: 2,
-      date: "12/10/2023",
-      taskNo: "SI20135",
-      type: "Production",
-      description: "Prepare 50 cupcakes for weekend orders",
-      deadline: "14/10/2023 at 08:00am",
-      allocatedBy: "L Montuma",
-      assignedTo: "2",
-      assignedStaffName: "Sarah Johnson",
-      status: "In Progress",
-    },
-    {
-      id: 3,
-      date: "12/10/2023",
-      taskNo: "SI20136",
-      type: "Delivery",
-      description: "Deliver special order to Corner Bakery",
-      deadline: "13/10/2023 at 15:30pm",
-      allocatedBy: "L Montuma",
-      assignedTo: "3",
-      assignedStaffName: "Mike Williams",
-      status: "Completed",
-    },
-  ]);
+  const { data = {} } = useGetTasksQuery();
 
-  const [staffMembers] = useState([
-    {
-      id: 1,
-      name: "Lwazi Montuma",
-      department: "Administration",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      department: "Production",
-      status: "active",
-    },
-    { id: 3, name: "Mike Williams", department: "Delivery", status: "active" },
-    { id: 4, name: "Lisa Brown", department: "Production", status: "inactive" },
-  ]);
+  const taskData = useMemo(
+    () =>
+      Array.isArray(data.data)
+        ? data.data.map((task) => ({ ...task, id: task._id })) // Normalize _id to id
+        : [],
+    [data.data]
+  );
 
-  const [selectedTask, setSelectedTask] = useState(tasks[0]);
+  const [tasks, setTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+
+  useEffect(() => {
+    setTasks(taskData);
+    if (taskData.length > 0) {
+      setSelectedTask({ ...taskData[0] }); // Clone to prevent shared reference
+    }
+  }, [taskData]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -81,15 +43,15 @@ const Tasks = () => {
   };
 
   const handleAddTask = (newTask) => {
-    setTasks((prev) => [...prev, newTask]);
+    setTasks((prev) => [...prev, { ...newTask, id: newTask._id }]);
   };
 
   const handleDeleteTask = (id) => {
     if (confirm("Are you sure you want to delete this task?")) {
       const updatedTasks = tasks.filter((task) => task.id !== id);
       setTasks(updatedTasks);
-      if (selectedTask.id === id && updatedTasks.length > 0) {
-        setSelectedTask(updatedTasks[0]);
+      if (selectedTask?.id === id && updatedTasks.length > 0) {
+        setSelectedTask({ ...updatedTasks[0] });
       }
     }
   };
@@ -99,7 +61,7 @@ const Tasks = () => {
       task.id === selectedTask.id ? { ...task, status } : task
     );
     setTasks(updatedTasks);
-    setSelectedTask({ ...selectedTask, status });
+    setSelectedTask((prev) => ({ ...prev, status }));
   };
 
   return (
@@ -124,6 +86,7 @@ const Tasks = () => {
                     <th className="p-3 font-medium">Type</th>
                     <th className="p-3 font-medium">Assigned To</th>
                     <th className="p-3 font-medium">Deadline</th>
+                    <th className="p-3 font-medium">Sale</th>
                     <th className="p-3 font-medium">Status</th>
                     <th className="p-3 font-medium">Actions</th>
                   </tr>
@@ -133,23 +96,34 @@ const Tasks = () => {
                     <tr
                       key={task.id}
                       className={`hover:bg-gray-50 cursor-pointer ${
-                        selectedTask.id === task.id ? "bg-purple-50" : ""
+                        selectedTask?.id === task.id ? "bg-purple-50" : ""
                       }`}
-                      onClick={() => setSelectedTask(task)}
+                      onClick={() => setSelectedTask({ ...task })}
                     >
-                      <td className="p-3">{task.date}</td>
+                      <td className="p-3">
+                        {new Date(task.createdAt).toLocaleDateString()}
+                      </td>
                       <td className="p-3">{task.taskNo}</td>
                       <td className="p-3">{task.type}</td>
-                      <td className="p-3">{task.assignedStaffName}</td>
-                      <td className="p-3">{task.deadline}</td>
+                      <td className="p-3">{task.assignedTo?.name}</td>
                       <td className="p-3">
-                        <span
-                          className={`px-2 py-1 text-xs rounded ${getStatusColor(
-                            task.status
-                          )}`}
-                        >
+                        {new Date(task.deadline).toLocaleDateString()}
+                      </td>
+                      <td className="p-3">
+                        {task.order?.invoiceNo} -{" "}
+                        {task.order?.customer?.shopName ||
+                          task.order?.customer?.name}
+                      </td>
+
+                      <td className="p-3">
+                        <Badge className={getStatusColor(task.status)}>
                           {task.status}
-                        </span>
+                        </Badge>
+                        {task.completedAt && (
+                          <div className="text-xs text-green-600 mt-1">
+                            Completed: {task.completedAt}
+                          </div>
+                        )}
                       </td>
                       <td className="p-3">
                         <div className="flex gap-3">
@@ -187,64 +161,88 @@ const Tasks = () => {
           </div>
 
           {/* Sidebar panel */}
-          <div className="w-80 bg-white shadow-sm rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              Task {selectedTask.taskNo}
-            </h3>
-            <p className="text-sm text-gray-700 mb-2">
-              {selectedTask.description}
-            </p>
-            <p className="text-sm text-blue-600 mb-4">
-              Assigned to: {selectedTask.assignedStaffName}
-            </p>
+          {selectedTask && (
+            <div className="w-80 bg-white shadow-sm rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4">
+                Task {selectedTask.taskNo}
+              </h3>
+              <p className="text-sm text-gray-700 mb-2">
+                {selectedTask.description}
+              </p>
+              <p className="text-sm text-blue-600 mb-2">
+                Assigned to: {selectedTask.assignedTo?.name}
+              </p>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Update status
-              </label>
-              <select
-                className="w-full border border-gray-300 p-2 rounded"
-                value={selectedTask.status}
-                onChange={(e) => updateTaskStatus(e.target.value)}
-              >
-                <option value="Pending">Pending</option>
-                <option value="Assigned">Assigned</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
+              <div className="text-sm text-gray-600 mb-4">
+                Assigned by: {selectedTask.assignedBy?.name}
+              </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Add Note</label>
-              <textarea
-                rows="4"
-                className="w-full border border-gray-300 p-2 rounded"
-                placeholder="Add any additional notes..."
-              />
-            </div>
+              {selectedTask.order?._id && (
+                <div className="text-sm text-gray-600 mb-4">
+                  Related Sale: {selectedTask.order?.invoiceNo} -{" "}
+                  {selectedTask.order?.customer?.shopName ||
+                    selectedTask.order?.customer?.name}
+                </div>
+              )}
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Deadline</label>
-              <div className="flex flex-wrap gap-2">
-                <input
-                  type="date"
-                  className="min-w-[120px] flex-1 p-2 border border-gray-300 rounded"
-                />
-                <input
-                  type="time"
-                  className="min-w-[90px] p-2 border border-gray-300 rounded"
-                />
-                <select className="min-w-[60px] p-2 border border-gray-300 rounded">
-                  <option>AM</option>
-                  <option>PM</option>
+              {selectedTask.completedAt && (
+                <div className="text-sm text-green-600 mb-4">
+                  Completed on: {selectedTask.completedAt}
+                </div>
+              )}
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Update status
+                </label>
+                <select
+                  className="w-full border border-gray-300 p-2 rounded"
+                  value={selectedTask.status}
+                  onChange={(e) => updateTaskStatus(e.target.value)}
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Assigned">Assigned</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
                 </select>
               </div>
-            </div>
 
-            <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-              Save task
-            </button>
-          </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Add Note
+                </label>
+                <textarea
+                  rows="4"
+                  className="w-full border border-gray-300 p-2 rounded"
+                  placeholder="Add any additional notes..."
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Deadline
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    type="date"
+                    className="min-w-[120px] flex-1 p-2 border border-gray-300 rounded"
+                  />
+                  <input
+                    type="time"
+                    className="min-w-[90px] p-2 border border-gray-300 rounded"
+                  />
+                  <select className="min-w-[60px] p-2 border border-gray-300 rounded">
+                    <option>AM</option>
+                    <option>PM</option>
+                  </select>
+                </div>
+              </div>
+
+              <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                Save task
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -252,7 +250,6 @@ const Tasks = () => {
         isOpen={isAddFormOpen}
         onClose={() => setIsAddFormOpen(false)}
         onAddTask={handleAddTask}
-        staffMembers={staffMembers}
       />
     </div>
   );

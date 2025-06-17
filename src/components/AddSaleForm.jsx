@@ -1,118 +1,16 @@
-import React, { useState } from "react";
+import { useAddSaleForm } from "../hooks/sales/use-createSale";
 
-export const AddSaleForm = ({ isOpen, onClose, onAddSale }) => {
-  const [formData, setFormData] = useState({
-    customerId: "",
-    customerName: "",
-    products: [],
-    total: 0,
-    recordedBy: "John Doe",
-    invoiceNo: "",
-  });
-
-  const customers = [
-    { id: "1", name: "Ngwabeni Methodist Church" },
-    { id: "2", name: "Local Bakery" },
-    { id: "3", name: "Community Center" },
-  ];
-
-  const products = [
-    { id: "1", name: "Scones", price: 40 },
-    { id: "2", name: "Chocolate Chip Cookies", price: 25.99 },
-    { id: "3", name: "Vanilla Cupcakes", price: 35.5 },
-  ];
-
-  const generateInvoiceNo = () => {
-    const number = Math.floor(Math.random() * 90000) + 10000;
-    return `SI${number}`;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.customerId && formData.products.length > 0) {
-      const invoiceNo = formData.invoiceNo || generateInvoiceNo();
-      const total = formData.products.reduce(
-        (sum, product) => sum + product.productTotal,
-        0
-      );
-
-      onAddSale({
-        ...formData,
-        invoiceNo,
-        total,
-      });
-
-      setFormData({
-        customerId: "",
-        customerName: "",
-        products: [],
-        total: 0,
-        recordedBy: "John Doe",
-        invoiceNo: "",
-      });
-
-      onClose();
-    }
-  };
-
-  const addProduct = () => {
-    setFormData((prev) => ({
-      ...prev,
-      products: [
-        ...prev.products,
-        { productId: "", productName: "", quantity: 1, productTotal: 0 },
-      ],
-    }));
-  };
-
-  const removeProduct = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      products: prev.products.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateProduct = (index, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      products: prev.products.map((product, i) => {
-        if (i === index) {
-          if (field === "productId") {
-            const selectedProduct = products.find((p) => p.id === value);
-            const quantity = product.quantity || 1;
-            return {
-              ...product,
-              productId: value,
-              productName: selectedProduct?.name || "",
-              productTotal: (selectedProduct?.price || 0) * quantity,
-            };
-          }
-          if (field === "quantity") {
-            const selectedProduct = products.find(
-              (p) => p.id === product.productId
-            );
-            return {
-              ...product,
-              quantity: value,
-              productTotal: (selectedProduct?.price || 0) * value,
-            };
-          }
-          return { ...product, [field]: value };
-        }
-        return product;
-      }),
-    }));
-  };
-
-  const handleCustomerChange = (e) => {
-    const customerId = e.target.value;
-    const customer = customers.find((c) => c.id === customerId);
-    setFormData((prev) => ({
-      ...prev,
-      customerId,
-      customerName: customer?.name || "",
-    }));
-  };
+export const AddSaleForm = ({ isOpen, onClose }) => {
+  const {
+    formData,
+    customers,
+    products,
+    handleSubmit,
+    handleCustomerChange,
+    addProduct,
+    removeProduct,
+    updateProduct,
+  } = useAddSaleForm(onClose);
 
   if (!isOpen) return null;
 
@@ -139,32 +37,11 @@ export const AddSaleForm = ({ isOpen, onClose, onAddSale }) => {
               >
                 <option value="">Select customer</option>
                 {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
+                  <option key={customer._id} value={customer._id}>
                     {customer.name}
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="invoiceNo"
-                className="block text-sm font-medium mb-1"
-              >
-                Invoice Number
-              </label>
-              <input
-                id="invoiceNo"
-                value={formData.invoiceNo}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    invoiceNo: e.target.value,
-                  }))
-                }
-                placeholder="Auto-generated if empty"
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-              />
             </div>
           </div>
 
@@ -198,7 +75,7 @@ export const AddSaleForm = ({ isOpen, onClose, onAddSale }) => {
                   >
                     <option value="">Select product</option>
                     {products.map((prod) => (
-                      <option key={prod.id} value={prod.id}>
+                      <option key={prod._id} value={prod._id}>
                         {prod.name} - R{prod.price}
                       </option>
                     ))}
