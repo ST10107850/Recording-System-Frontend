@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
-import {  Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Topbar from "../components/TopBar";
 import AddProductForm from "../components/AddProductForm";
 import { useProduct } from "../hooks/product/use-product";
+import { useToast } from "../hooks/use-toast";
+import { useDeleteProductMutation } from "../features/user/product-slice";
 
 export const Product = () => {
   const { data = {} } = useProduct();
   const [products, setProducts] = useState([]);
-  
+  const { toast } = useToast();
+
   useEffect(() => {
     if (Array.isArray(data.data)) {
       setProducts(data.data);
@@ -17,6 +20,8 @@ export const Product = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+
+  const [deleteProduct] = useDeleteProductMutation();
 
   const filteredProducts = products.filter(
     (product) =>
@@ -33,9 +38,29 @@ export const Product = () => {
     setProducts((prev) => [...prev, product]);
   };
 
-  const handleDeleteProduct = (id) => {
+  const handleDeleteProduct = async (id) => {
+    if (!id || id.length !== 24) {
+      toast({
+        title: "Invalid product ID",
+        description: "Product not found — it may have already been deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (window.confirm("Are you sure you want to delete this product?")) {
-      setProducts(products.filter((product) => product._id !== id));
+      try {
+        await deleteProduct(id).unwrap();
+        toast({
+          title: "Deletion Successful",
+          description: "That product is now off the list — great job!",
+        });
+      } catch (error) {
+        toast({
+          title: "Deletion failed",
+          description: error?.data?.message || "Something went wrong.",
+          variant: "destructive",
+        });
+      }
     }
   };
   return (
@@ -105,13 +130,13 @@ export const Product = () => {
                     <Eye className="h-4 w-4" />
                   </Link>
                   <Link
-                    to={`/products/${product.id}/edit`}
+                    to={`/products/${product._id}/edit`}
                     className="p-1 hover:bg-gray-100 rounded"
                   >
                     <Edit className="h-4 w-4" />
                   </Link>
                   <button
-                    onClick={() => handleDeleteProduct(product.id)}
+                    onClick={() => handleDeleteProduct(product._id)}
                     className="p-1 text-red-500 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />

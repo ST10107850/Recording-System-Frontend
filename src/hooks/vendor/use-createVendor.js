@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useToast } from "./use-toast";
+import { useToast } from "../use-toast";
 import { useNavigate } from "react-router-dom";
-import { useCreateVendorMutation } from "../features/user/vendorSlice";
+import { useCreateVendorMutation } from "../../features/user/vendorSlice";
 
 export const useCreateVendor = () => {
   const [name, setName] = useState("");

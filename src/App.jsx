@@ -21,6 +21,7 @@ import Inventory from "./pages/Inventory";
 import InventoryView from "./pages/InventoryView";
 import InventoryForm from "./pages/InventoryForm";
 import Tasks from "./pages/Task";
+import { PrivateRoute } from "./pages/PrivateRoute";
 
 function App() {
   return (
@@ -29,38 +30,39 @@ function App() {
       <Sonner />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="" element={<PrivateRoute />}>
+          <Route path="/" element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/vendors" element={<Vendors />} />
+            <Route path="/resellers" element={<Resellers />} />
+            <Route path="/staff" element={<Staff />} />
 
-        <Route path="/" element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/vendors" element={<Vendors />} />
-          <Route path="/resellers" element={<Resellers />} />
-          <Route path="/staff" element={<Staff />} />
+            <Route path="/purchases">
+              <Route index element={<PurchaseList />} />
+              <Route path="create" element={<Purchase />} />
+              <Route path=":id" element={<PurchaseView />} />
+            </Route>
 
-          <Route path="/purchases">
-            <Route index element={<PurchaseList />} />
-            <Route path="create" element={<Purchase />} />
-            <Route path=":id" element={<PurchaseView />} />
+            <Route path="/sales">
+              <Route index element={<Sales />} />
+              <Route path=":id" element={<SaleView />} />
+              <Route path=":id/edit" element={<SaleForm />} />
+            </Route>
+
+            <Route path="/products">
+              <Route index element={<Product />} />
+              <Route path=":id" element={<ProductView />} />
+              <Route path=":id/edit" element={<ProductForm />} />
+            </Route>
+
+            <Route path="/inventory">
+              <Route index element={<Inventory />} />
+              <Route path=":id" element={<InventoryView />} />
+              <Route path=":id/edit" element={<InventoryForm />} />
+            </Route>
+
+            <Route path="/tasks" element={<Tasks />} />
           </Route>
-
-          <Route path="/sales">
-            <Route index element={<Sales />} />
-            <Route path=":id" element={<SaleView />} />
-            <Route path=":id/edit" element={<SaleForm />} />
-          </Route>
-
-          <Route path="/products">
-            <Route index element={<Product />} />
-            <Route path=":id" element={<ProductView />} />
-            <Route path=":id/edit" element={<ProductForm />} />
-          </Route>
-
-          <Route path="/inventory">
-            <Route index element={<Inventory />} />
-            <Route path=":id" element={<InventoryView />} />
-            <Route path=":id/edit" element={<InventoryForm />} />
-          </Route>
-
-          <Route path="/tasks" element={<Tasks />} />
         </Route>
       </Routes>
     </div>

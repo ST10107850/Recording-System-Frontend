@@ -1,4 +1,4 @@
-import { User, Mail, Phone, Shield, Eye, Edit, Trash2 } from "lucide-react";
+import { User, Mail, Phone, Shield, Eye, Edit, Trash2, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import Topbar from "../components/TopBar";
 import { Card } from "../components/ui/Card";
@@ -7,21 +7,23 @@ import ViewStaffModal from "../components/ViewStaffModal";
 import AddStaffForm from "../components/AddStaffForm";
 import EditStaffForm from "../components/EditStaffForm";
 import { useGetStaff } from "../hooks/staff/use-getStaff";
+import { useToast } from "../hooks/use-toast";
+import { useDeleteUserMutation } from "../features/user/userSlice";
 
 export const Staff = () => {
-  const {data ={}}= useGetStaff();
+  const { data = {} } = useGetStaff();
 
   const [staff, setStaff] = useState([]);
+  const { toast } = useToast();
+
+  const [deleteStaff] = useDeleteUserMutation();
 
   useEffect(() => {
     if (Array.isArray(data?.data)) {
       setStaff(data.data);
     }
   }, [data]);
-  
 
-  
- 
   const getRoleColor = (role) => {
     switch (role) {
       case "management":
@@ -35,32 +37,60 @@ export const Staff = () => {
     }
   };
 
-
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleAddStaff = (newStaff) => {
     setStaff((prev) => [...prev, newStaff]);
   };
   const handleUpdateStaff = (updatedStaff) => {
-    setStaff(prev => prev.map(member => 
-      member._id === updatedStaff._id ? updatedStaff : member
-    ));
+    setStaff((prev) =>
+      prev.map((member) =>
+        member._id === updatedStaff._id ? updatedStaff : member
+      )
+    );
     setSelectedStaff(null);
   };
 
   const handleViewStaff = (id) => {
-    const staffMember = staff.find(member => member._id === id);
+    const staffMember = staff.find((member) => member._id === id);
     setSelectedStaff(staffMember);
     setIsViewModalOpen(true);
   };
 
   const handleEditStaff = (id) => {
-    const staffMember = staff.find(member => member._id === id);
+    const staffMember = staff.find((member) => member._id === id);
     setSelectedStaff(staffMember);
     setIsEditFormOpen(true);
+  };
+
+  const handleDeleteUser = async (id) => {
+    if (!id || id.length !== 24) {
+      toast({
+        title: "Invalid user ID",
+        description: "User not found — it may have already been deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await deleteStaff(id).unwrap();
+        toast({
+          title: "Deletion Successful",
+          description: "That staff is now off the list — great job!",
+        });
+      } catch (error) {
+        toast({
+          title: "Deletion failed",
+          description: error?.data?.message || "Something went wrong.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
@@ -137,6 +167,7 @@ export const Staff = () => {
                   <button
                     variant="outline"
                     size="sm"
+                    onClick={() => handleDeleteUser(member._id)}
                     className="border border-gray-200 text-sm px-3 py-1 text-red-600 rounded hover:bg-gray-50 transition w-full flex items-center justify-center"
                   >
                     <Trash2 className="w-3 h-3" />
@@ -146,6 +177,33 @@ export const Staff = () => {
             </Card>
           ))}
         </div>
+
+        {staff.length === 0 && (
+          <div className="text-center py-12">
+            <div className="mx-auto max-w-md">
+              <div className="mx-auto h-12 w-12 text-gray-400">
+                <Plus className="h-full w-full" />
+              </div>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                No staff found
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {searchTerm
+                  ? "Try adjusting your search terms"
+                  : "Get started by creating your first staff"}
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => setIsAddFormOpen(true)}
+                  className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create Staff
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <AddStaffForm

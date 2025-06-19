@@ -42,21 +42,7 @@ const AddTaskForm = ({ isOpen, onClose, onAddTask, staffMembers }) => {
       <div className="bg-white rounded-lg shadow-lg max-w-xl w-full max-h-[90vh] overflow-y-auto p-6">
         <h2 className="text-lg font-semibold mb-4">Add New Task</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="taskNo" className="block text-sm font-medium mb-1">
-              Task Number
-            </label>
-            <input
-              id="taskNo"
-              value={formData.taskNo}
-              onChange={(e) =>
-                setFormData({ ...formData, taskNo: e.target.value })
-              }
-              placeholder="SI20134"
-              required
-              className="w-full p-2 border border-gray-300 rounded"
-            />
-          </div>
+          
 
           <div>
             <label className="block text-sm font-medium mb-1">Type</label>
@@ -103,8 +89,7 @@ const AddTaskForm = ({ isOpen, onClose, onAddTask, staffMembers }) => {
               className="w-full p-2 border border-gray-300 rounded"
             >
               <option value="">Select staff member</option>
-              {staffMembers
-                .filter((staff) => staff.status === "active")
+              {staffMembers?.filter((staff) => staff.status === "active")
                 .map((staff) => (
                   <option key={staff.id} value={staff.id}>
                     {staff.name} - {staff.department}
@@ -175,7 +160,7 @@ const AddTaskForm = ({ isOpen, onClose, onAddTask, staffMembers }) => {
             </button>
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+              className="flex-1 bg-gray-800 text-white p-2 rounded hover:bg-gray-900"
             >
               Add Task
             </button>

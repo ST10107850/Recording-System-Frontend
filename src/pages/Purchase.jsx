@@ -144,7 +144,7 @@ export const Purchase = () => {
 
               {purchaseItems.map((item) => (
                 <div
-                  key={item.id}
+                  key={item._id}
                   className="grid grid-cols-4 gap-4 mb-4 items-center"
                 >
                   <select
@@ -157,9 +157,9 @@ export const Purchase = () => {
                     <option value="" disabled>
                       Select or type item name
                     </option>
-                    {predefinedItems.map((itemName, idx) => (
+                    {predefinedItems.map((itemName, unit, idx) => (
                       <option key={`${itemName}-${idx}`} value={itemName}>
-                        {itemName}
+                        {itemName} - {(unit)}
                       </option>
                     ))}
                   </select>
@@ -241,7 +241,7 @@ export const Purchase = () => {
               <button
                 onClick={handleSavePurchase}
                 disabled={isLoading}
-                className="bg-blue-400 hover:bg-blue-600 text-white px-16 py-3 rounded-full"
+                className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md flex items-center gap-2"
               >
                 Save Purchase
               </button>

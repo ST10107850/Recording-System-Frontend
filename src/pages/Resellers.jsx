@@ -11,89 +11,36 @@ import {
   Edit,
   Trash2,
   Building2,
+  Plus,
 } from "lucide-react";
 import { Badge } from "../components/ui/Badge";
 import AddResellerForm from "../components/AddResellerForm";
 import ViewResellerModal from "../components/ViewResellerModal";
 import EditResellerForm from "../components/EditResellerForm ";
 import { Progress } from "../components/ui/Progress";
-import { useGetCustomerCountSalesQuery } from "../features/user/sale-slice";
+import { useResellers } from "../hooks/resellers/use-getReseller";
 
 const Resellers = () => {
-  const { data = {} } = useGetCustomerCountSalesQuery();
-  const resellersData = React.useMemo(
-    () => (Array.isArray(data.data) ? data.data : []),
-    [data.data]
-  );
-  
-  const [resellers, setResellers] = useState([]);
-
-  useEffect(() => {
-    setResellers(resellersData);
-  }, [resellersData]);
-
-
-  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
-  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedReseller, setSelectedReseller] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-
-
-  const filteredResellers = resellers.filter((reseller) => {
-    const shopName = reseller.customer?.shopName?.toLowerCase() || "";
-    const name = reseller.customer?.name?.toLowerCase() || "";
-    return (
-      shopName.includes(searchTerm.toLowerCase()) ||
-      name.includes(searchTerm.toLowerCase())
-    );
-  });
-
-
-  const calculateDiscountProgress = (salesCount) => {
-    const targetSales = 15;
-    return Math.min((salesCount / targetSales) * 100, 100);
-  };
-
-
-  const getDiscountStatus = (salesCount) => {
-    if (salesCount >= 15) {
-      return { eligible: true, remaining: 0 };
-    }
-    return { eligible: false, remaining: 15 - salesCount };
-  };
-
-
-  const handleAddReseller = (newReseller) => {
-    setResellers((prev) => [...prev, newReseller]);
-  };
-
-  const handleUpdateReseller = (updatedReseller) => {
-    setResellers((prev) =>
-      prev.map((reseller) =>
-        reseller._id === updatedReseller._id ? updatedReseller : reseller
-      )
-    );
-    setSelectedReseller(null);
-  };
-
-  const handleDeleteReseller = (id) => {
-    if (window.confirm("Are you sure you want to delete this reseller?")) {
-      setResellers((prev) => prev.filter((reseller) => reseller._id !== id));
-    }
-  };
-
-  const handleViewReseller = (id) => {
-    const reseller = resellers.find((reseller) => reseller._id === id);
-    setSelectedReseller(reseller || null);
-    setIsViewModalOpen(true);
-  };
-
-  const handleEditReseller = (id) => {
-    const reseller = resellers.find((r) => r._id === id);
-    setSelectedReseller(reseller || null);
-    setIsEditFormOpen(true);
-  };
+  const {
+    filteredResellers,
+    isAddFormOpen,
+    setIsAddFormOpen,
+    isEditFormOpen,
+    setIsEditFormOpen,
+    isViewModalOpen,
+    setIsViewModalOpen,
+    selectedReseller,
+    setSelectedReseller,
+    searchTerm,
+    setSearchTerm,
+    calculateDiscountProgress,
+    getDiscountStatus,
+    handleAddReseller,
+    handleUpdateReseller,
+    handleDeleteReseller,
+    handleViewReseller,
+    handleEditReseller,
+  } = useResellers();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -110,7 +57,7 @@ const Resellers = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredResellers.length === 0 ? (
             <div className="col-span-1 lg:col-span-2 xl:col-span-3 text-center text-gray-500">
-              No resellers found matching your search criteria.
+              {/* No resellers found matching your search criteria. */}
             </div>
           ) : (
             filteredResellers.map((reseller) => {
@@ -274,14 +221,41 @@ const Resellers = () => {
             })
           )}
         </div>
+
+        {filteredResellers.length === 0 && (
+          <div className="text-center py-12">
+            <div className="mx-auto max-w-md">
+              <div className="mx-auto h-12 w-12 text-gray-400">
+                <Plus className="h-full w-full" />
+              </div>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                No customer sale found
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {searchTerm
+                  ? "Try adjusting your search terms"
+                  : "Get started by creating your first customer sale"}
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => setIsAddFormOpen(false)}
+                  className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create Customer Sale
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {isAddFormOpen && (
-        <AddResellerForm
-          onClose={() => setIsAddFormOpen(false)}
-          onAdd={handleAddReseller}
-        />
-      )}
+
+      <AddResellerForm
+        isOpen={isAddFormOpen}
+        onClose={() => setIsAddFormOpen(true)}
+        onAdd={handleAddReseller}
+      />
 
       <ViewResellerModal
         isOpen={isViewModalOpen}

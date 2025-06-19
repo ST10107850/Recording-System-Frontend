@@ -4,12 +4,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import Topbar from "../components/TopBar";
+import { useGetProductsQuery } from "../features/user/product-slice";
+import { useGetResellersQuery } from "../features/user/reseller-slice";
+import { useGetSaleByIdQuery } from "../features/user/sale-slice";
 
 const SaleForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
   const isEditing = Boolean(id);
+
+   const { data: resellersData = { data: [] } } = useGetResellersQuery();
+    const mockCustomers = resellersData.data;
+    console.log("c: ", mockCustomers);
+    
+  
+    const { data: productsData = { data: [] } } = useGetProductsQuery();
+    const mockProducts = productsData.data;
+    console.log("P: ", mockProducts);
+
+    const { data: salesData = { data: [] } } = useGetSaleByIdQuery(id);
+    const sale = salesData.data;
+
+    console.log("sale", sale);
+    
+    
 
   const [formData, setFormData] = useState({
     customer: "",
@@ -18,17 +37,6 @@ const SaleForm = () => {
     invoiceNo: `INV-${Date.now()}`,
   });
 
-  const mockProducts = [
-    { id: "1", name: "Chocolate Cake", price: 250 },
-    { id: "2", name: "Vanilla Cupcakes", price: 150 },
-    { id: "3", name: "Red Velvet Cake", price: 300 },
-  ];
-
-  const mockCustomers = [
-    { id: "1", name: "John Doe" },
-    { id: "2", name: "Jane Smith" },
-    { id: "3", name: "Bob Wilson" },
-  ];
 
   const addProduct = () => {
     setFormData((prev) => ({
@@ -55,7 +63,7 @@ const SaleForm = () => {
 
       if (field === "product" || field === "quantity") {
         const product = mockProducts.find(
-          (p) => p.id === newProducts[index].product
+          (p) => p._id === newProducts[index].product
         );
         if (product) {
           newProducts[index].productTotal =
@@ -107,7 +115,7 @@ const SaleForm = () => {
   return (
     <div>
       <Topbar
-        title={`Edit Sale No. ${isEditing ? id : "New Sale"}`}
+        title={`Edit Sale No. ${isEditing ? sale.invoiceNo : "New Sale"}`}
         showSearch={false}
         showAddButton={false}
       />

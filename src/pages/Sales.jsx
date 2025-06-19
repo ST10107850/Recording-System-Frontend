@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import Topbar from "../components/TopBar";
 import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
-import { Card } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
 import { AddSaleForm } from "../components/AddSaleForm";
 import { useSale } from "../hooks/sales/use-sale";
+import { useToast } from "../hooks/use-toast";
+import { useDeleteSaleMutation } from "../features/user/sale-slice";
 
 export const Sales = () => {
   const { data = {} } = useSale();
+
+  const {toast} = useToast()
 
 
   const [sales, setSales] = useState([]);
@@ -21,6 +23,8 @@ export const Sales = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+
+  const [deleteSale] = useDeleteSaleMutation()
 
   const filteredSales = sales.filter(
     (sale) =>
@@ -48,11 +52,33 @@ export const Sales = () => {
     setSales((prev) => [...prev, sale]);
   };
 
-  const handleDeleteSale = (id) => {
+  const handleDeleteSale = async (id) => {
+    if (!id || id.length !== 24) {
+      toast({
+        title: "Invalid sale ID",
+        description: "Sale not found — it may have already been deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (confirm("Are you sure you want to delete this sale?")) {
-      setSales(sales.filter((sale) => sale.id !== id));
+      try {
+        await deleteSale(id).unwrap();
+        toast({
+          title: "Sale Deleted",
+          description: "Successfully deleted the sale.",
+        });
+      } catch (error) {
+        toast({
+          title: "Deletion failed",
+          description: error?.data?.message || "Something went wrong.",
+          variant: "destructive",
+        });
+      }
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,7 +152,7 @@ export const Sales = () => {
                             className="flex justify-between items-center"
                           >
                             <span className="text-gray-600">
-                              {item.product.name}
+                              {item.product?.name}
                             </span>
                             <span className="bg-gray-200 text-xs px-2 py-0.5 rounded">
                               {item.quantity} × R
@@ -191,7 +217,7 @@ export const Sales = () => {
                   <div className="mt-6">
                     <button
                       onClick={() => setIsAddFormOpen(true)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-700"
+                      className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-md flex items-center gap-2"
                     >
                       <Plus className="h-4 w-4" />
                       Create Sale

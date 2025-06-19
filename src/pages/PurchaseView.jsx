@@ -22,7 +22,6 @@ export const PurchaseView = () => {
       />
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Back Button */}
           <button
             variant="ghost"
             onClick={() => navigate("/purchases")}
@@ -33,10 +32,8 @@ export const PurchaseView = () => {
           </button>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Purchase Details */}
             <div className="lg:col-span-2">
               <Card className="p-8 bg-white hover:shadow-lg transition-shadow shadow-md border-b border-gray-200">
-                {/* Header Section */}
                 <div className="flex justify-between items-start mb-8">
                   <div>
                     <h1 className="text-2xl font-bold mb-2">

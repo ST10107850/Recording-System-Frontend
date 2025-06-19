@@ -42,7 +42,7 @@ export const saleSlice = apiSlice.injectEndpoints({
 
     deleteSale: builder.mutation({
       query: (id) => ({
-        url: `${SALE_URL}/${id}`,
+        url: `${SALE_URL}/delete/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, id) => [{ type: "Sale", id }, "Sale"],

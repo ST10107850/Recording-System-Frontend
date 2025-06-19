@@ -129,7 +129,7 @@ export const AddItemForm = ({ isOpen, onClose }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-400 text-white rounded-md text-sm hover:bg-blue-700"
+              className="px-4 py-2 bg-gray-800 text-white rounded-md text-sm hover:bg-gray-900"
             >
               {saving ? "Saving…" : "Add Item"}
             </button>

@@ -1,38 +1,68 @@
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Topbar from "../components/TopBar";
+import {
+  useGetInventoryByIdQuery,
+  useUpdateInventoryMutation,
+} from "../features/user/inventory-slice";
+import { useForm } from "react-hook-form";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { useToast } from "../hooks/use-toast";
 
 const InventoryForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = Boolean(id);
+  const { data: getInventory } = useGetInventoryByIdQuery(id ?? skipToken);
+  const [updateInventory] = useUpdateInventoryMutation();
 
-  const [formData, setFormData] = useState({
-    itemName: "",
-    category: "ingredients",
-    quantity: 0,
-    minStockLevel: 0,
-    unitCost: 0,
+  const newInventory = getInventory?.data;
+
+  const { toast } = useToast();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isDirty },
+  } = useForm({
+    mode: "onChange",
+    defaultValues: {
+      itemName: "",
+      category: "",
+      quantity: 0,
+      minStockLevel: 0,
+    },
   });
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!formData.itemName || formData.quantity < 0 || formData.unitCost < 0) {
-      alert("Please fill in all required fields with valid values.");
-      return;
+  useEffect(() => {
+    if (newInventory) {
+      reset({
+        itemName: newInventory.itemName,
+        category: newInventory.category,
+        quantity: newInventory.quantity,
+        minStockLevel: newInventory.minStockLevel,
+      });
     }
+  }, [newInventory, reset]);
 
-    alert(`Inventory item ${isEditing ? "updated" : "created"} successfully!`);
-    navigate("/inventory");
+  const onSubmit = async (data) => {
+    try {
+      if (isEditing) {
+        await updateInventory({ id, ...data }).unwrap();
+      }
+
+      toast({
+        title: "Inventory updated!",
+        description:
+          "Changes have been saved to the Dough Better Records System.",
+      });
+      navigate("/inventory");
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert("Failed to update inventory.");
+    }
   };
 
   return (
@@ -55,7 +85,7 @@ const InventoryForm = () => {
         <div className="border rounded-lg shadow-sm p-6 hover:shadow-lg transition-shadow bg-white border-gray-200">
           <h2 className="text-xl font-semibold mb-4">Item Details</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label
                 htmlFor="itemName"
@@ -67,8 +97,7 @@ const InventoryForm = () => {
                 id="itemName"
                 type="text"
                 className="w-full px-3 py-2 border rounded border-gray-200"
-                value={formData.itemName}
-                onChange={(e) => handleInputChange("itemName", e.target.value)}
+                {...register("itemName", { required: true })}
                 placeholder="Enter item name"
                 required
               />
@@ -83,8 +112,7 @@ const InventoryForm = () => {
               </label>
               <select
                 id="category"
-                value={formData.category}
-                onChange={(e) => handleInputChange("category", e.target.value)}
+                {...register("category", { required: true })}
                 className="w-full border-gray-200 px-3 py-2 border rounded"
                 required
               >
@@ -106,10 +134,7 @@ const InventoryForm = () => {
                   id="quantity"
                   type="number"
                   className="w-full px-3 py-2 border rounded border-gray-200"
-                  value={formData.quantity}
-                  onChange={(e) =>
-                    handleInputChange("quantity", Number(e.target.value))
-                  }
+                  {...register("quantity", { required: true, min: 0 })}
                   placeholder="0"
                   min="0"
                   required
@@ -127,37 +152,12 @@ const InventoryForm = () => {
                   id="minStockLevel"
                   type="number"
                   className="w-full px-3 py-2 border rounded border-gray-200"
-                  value={formData.minStockLevel}
-                  onChange={(e) =>
-                    handleInputChange("minStockLevel", Number(e.target.value))
-                  }
+                  {...register("minStockLevel", { required: true, min: 0 })}
                   placeholder="0"
                   min="0"
                   required
                 />
               </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="unitCost"
-                className="block text-sm font-medium mb-1"
-              >
-                Unit Cost (R) *
-              </label>
-              <input
-                id="unitCost"
-                type="number"
-                step="0.01"
-                className="w-full px-3 py-2 border rounded border-gray-200"
-                value={formData.unitCost}
-                onChange={(e) =>
-                  handleInputChange("unitCost", Number(e.target.value))
-                }
-                placeholder="0.00"
-                min="0"
-                required
-              />
             </div>
 
             <div className="flex justify-end space-x-4 pt-4">
@@ -170,7 +170,12 @@ const InventoryForm = () => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                disabled={!isDirty}
+                className={`px-4 py-2 rounded text-white ${
+                  isDirty
+                    ? "bg-gray-800 hover:bg-gray-900"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
               >
                 {isEditing ? "Update Item" : "Add Item"}
               </button>
