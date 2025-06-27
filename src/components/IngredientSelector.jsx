@@ -1,8 +1,9 @@
 const IngredientSelector = ({
   ingredient,
   index,
+  ingredients,
   inventoryItems,
-  invLoading,
+  // invLoading,
   onUpdate,
   onRemove,
 }) => {
@@ -13,16 +14,23 @@ const IngredientSelector = ({
         <select
           value={ingredient.inventoryItemId}
           onChange={(e) => onUpdate(index, "inventoryItemId", e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-2 py-2"
+          className="border border-gray-300 rounded-md p-2 w-full"
         >
-          <option value="">
-            {invLoading ? "Loading items..." : "Select item"}
-          </option>
-          {inventoryItems.map((item) => (
-            <option key={item._id} value={item._id}>
-              {item.itemName} ({item.unit})
-            </option>
-          ))}
+          <option value="">-- choose item --</option>
+          {inventoryItems.map((item) => {
+            const alreadySelected = ingredients.some(
+              (ing, i) => i !== index && ing.inventoryItemId === item._id
+            );
+            return (
+              <option
+                key={item._id}
+                value={item._id}
+                disabled={alreadySelected}
+              >
+                {item.itemName} {alreadySelected ? "(already selected)" : ""}
+              </option>
+            );
+          })}
         </select>
       </div>
 

@@ -22,6 +22,10 @@ export const PurchaseList = () => {
     navigate(`/purchases/${purchaseId}`);
   };
 
+  const handleEditPurchase = (purchaseId) => {
+    navigate(`${purchaseId}/edit`);
+  };
+
   const handleNewPurchase = () => {
     navigate("create");
   };
@@ -122,7 +126,7 @@ export const PurchaseList = () => {
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleViewPurchase(purchase._id)}
+                          onClick={() => handleEditPurchase(purchase._id)}
                           className="text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-100"
                         >
                           <Edit className="h-4 w-4" />

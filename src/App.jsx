@@ -22,6 +22,7 @@ import InventoryView from "./pages/InventoryView";
 import InventoryForm from "./pages/InventoryForm";
 import Tasks from "./pages/Task";
 import { PrivateRoute } from "./pages/PrivateRoute";
+import { PurchaseForm } from "./pages/PurchaseForm";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
               <Route index element={<PurchaseList />} />
               <Route path="create" element={<Purchase />} />
               <Route path=":id" element={<PurchaseView />} />
+              <Route path=":id/edit" element={<PurchaseForm/>}/>
             </Route>
 
             <Route path="/sales">

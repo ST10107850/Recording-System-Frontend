@@ -1,101 +1,25 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Topbar from "../components/TopBar";
 import { Card } from "../components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import IngredientsSection from "../components/IngredientsSection";
+import { useProductForm } from "../hooks/product/use-editProduct";
 
 const ProductForm = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const isEditing = !!id;
-
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: 0,
-    ingredients: [],
-  });
-
-  const inventoryItems = [
-    { id: "1", name: "Flour" },
-    { id: "2", name: "Sugar" },
-    { id: "3", name: "Chocolate Chips" },
-    { id: "4", name: "Butter" },
-    { id: "5", name: "Vanilla Extract" },
-    { id: "6", name: "Eggs" },
-    { id: "7", name: "Milk" },
-    { id: "8", name: "Baking Powder" },
-  ];
-
-  useEffect(() => {
-    if (isEditing && id) {
-      const mockProduct = {
-        name: "Chocolate Chip Cookies",
-        description: "Delicious homemade chocolate chip cookies",
-        price: 25.99,
-        ingredients: [
-          { inventoryItemId: "1", inventoryItemName: "Flour", quantity: 2 },
-          { inventoryItemId: "2", inventoryItemName: "Sugar", quantity: 1 },
-          {
-            inventoryItemId: "3",
-            inventoryItemName: "Chocolate Chips",
-            quantity: 0.5,
-          },
-        ],
-      };
-      setFormData(mockProduct);
-    }
-  }, [isEditing, id]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (isEditing) {
-      console.log("Product updated:", formData);
-    } else {
-      console.log("Product created:", formData);
-    }
-    navigate("/products");
-  };
-
-  const addIngredient = () => {
-    setFormData((prev) => ({
-      ...prev,
-      ingredients: [
-        ...prev.ingredients,
-        { inventoryItemId: "", inventoryItemName: "", quantity: 0 },
-      ],
-    }));
-  };
-
-  const removeIngredient = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      ingredients: prev.ingredients.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateIngredient = (index, field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      ingredients: prev.ingredients.map((ingredient, i) => {
-        if (i === index) {
-          if (field === "inventoryItemId") {
-            const selectedItem = inventoryItems.find(
-              (item) => item.id === value
-            );
-            return {
-              ...ingredient,
-              inventoryItemId: value,
-              inventoryItemName: selectedItem?.name || "",
-            };
-          }
-          return { ...ingredient, [field]: value };
-        }
-        return ingredient;
-      }),
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    onSubmit,
+    isDirty,
+    isEditing,
+    fields,
+    inventoryItems,
+    invLoading,
+    addIngredient,
+    updateIngredient,
+    removeIngredient,
+  } = useProductForm();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,80 +36,47 @@ const ProductForm = () => {
             </button>
           </div>
 
-          <Card className="p-6 hover:shadow-lg transition-shadow shadow-md border-b border-gray-200 bg-white">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <Card className="p-6 shadow-lg border border-gray-300 bg-white">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Product Name
-                  </label>
+                  <label className="text-sm font-medium">Product Name</label>
                   <input
-                    id="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, name: e.target.value }))
-                    }
-                    placeholder="Enter product name"
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    {...register("name", { required: true })}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2"
+                    placeholder="Enter name"
                   />
                 </div>
-
                 <div className="space-y-2">
-                  <label
-                    htmlFor="price"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Price (R)
-                  </label>
+                  <label className="text-sm font-medium">Price (R)</label>
                   <input
-                    id="price"
                     type="number"
                     step="0.01"
                     min="0"
-                    value={formData.price || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        price: Number(e.target.value),
-                      }))
-                    }
+                    {...register("price", {
+                      required: true,
+                      valueAsNumber: true,
+                    })}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-2"
                     placeholder="0.00"
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Description
-                </label>
+                <label className="text-sm font-medium">Description</label>
                 <textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  placeholder="Enter product description"
                   rows={3}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  {...register("description", { required: true })}
+                  className="w-full border border-gray-200 rounded-lg px-4 py-2"
+                  placeholder="Enter product description"
                 />
               </div>
 
               <IngredientsSection
-                ingredients={formData.ingredients}
+                ingredients={fields}
                 inventoryItems={inventoryItems}
+                invLoading={invLoading}
                 onAddIngredient={addIngredient}
                 onUpdateIngredient={updateIngredient}
                 onRemoveIngredient={removeIngredient}
@@ -195,15 +86,21 @@ const ProductForm = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/products")}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-100"
+                  className="px-4 py-2 border text-gray-700 rounded hover:bg-gray-100"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#0f172a] text-white rounded hover:bg-blue-700"
+                  disabled={!isDirty}
+                  className={`px-4 py-2 rounded text-white ${
+                    isDirty
+                      ? "bg-gray-800 hover:bg-gray-900"
+                      : "bg-gray-300 cursor-not-allowed"
+                  }`}
                 >
-                  {isEditing ? "Update Product" : "Create Product"}
+                  {isEditing ? "Update Item" : "Add Item"}
                 </button>
               </div>
             </form>

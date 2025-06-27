@@ -27,6 +27,7 @@ const IngredientsSection = ({
           key={index}
           ingredient={ingredient}
           index={index}
+          ingredients={ingredients}
           inventoryItems={inventoryItems}
           invLoading={invLoading}
           onUpdate={onUpdateIngredient}

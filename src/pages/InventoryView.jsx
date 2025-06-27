@@ -151,25 +151,7 @@ const InventoryView = () => {
                     </p>
                     <p className="text-lg">{mockInventoryItem.minStockLevel}</p>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Unit Cost
-                    </p>
-                    <p className="text-lg font-semibold">
-                      R{mockInventoryItem.unitCost?.toFixed(2)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Total Value
-                    </p>
-                    <p className="text-lg font-semibold">
-                      R
-                      {(
-                        mockInventoryItem.quantity * mockInventoryItem.unitCost
-                      )?.toFixed(2)}
-                    </p>
-                  </div>
+                  
                 </div>
               </CardContent>
             </Card>
